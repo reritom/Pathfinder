@@ -5,19 +5,13 @@ class Maze:
         self.blocks = set()
 
     def get_surroundings(self, position, view_range=1):
+        print("Getting surroundings of {}".format(position))
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
 
         if view_range == 0:
             return set(position)
 
-        """
-        surroundings = set()
-        for radius in range(view_range):
-            surroundings = surroundings.union(self.bresenhams_circle(centre_x, centre_y, radius))
-
-        return surroundings
-        """
         perimeter = self.bresenhams_circle(centre_x, centre_y, view_range)
 
         # We will fill the area within the perimeter
@@ -47,6 +41,7 @@ class Maze:
 
         # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
         for block in relevent_blocks:
+            # From the centre, looks for the intercept of the corners of the block
             pass
 
         # Strip any that are outside of the grid

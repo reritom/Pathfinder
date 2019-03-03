@@ -1,3 +1,6 @@
+import numpy as np
+from itertools import combinations
+
 class Maze:
     def __init__(self, x, y):
         self.x = x
@@ -42,11 +45,50 @@ class Maze:
         # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
         for block in relevent_blocks:
             # From the centre, looks for the intercept of the corners of the block
-            pass
+            corners = [
+                np.array([block[0], block[1]]),
+                np.array([block[0] + 1, block[1]]),
+                np.array([block[0], block[1] + 1]),
+                np.array([block[0] + 1, block[1] + 1])
+            ]
+
+            centre = np.array([centre_x + 0.5, centre_y + 0.5])
+
+            # List of different combinations of two corners
+            mixes = combinations(corners, 2)
+
+            # Find the greatest angle between two corners
+            theta_results = []
+
+            for combo in mixes:
+                corner_1 = combo[0]
+                corner_2 = combo[1]
+
+                # Normalise the two points relative to the centre
+                c1_centre = corner_1 - centre
+                c2_centre = corner_2 - centre
+
+                cosine_angle = np.dot(c1_centre, c2_centre) / (np.linalg.norm(c1_centre) * np.linalg.norm(c2_centre))
+                angle = np.arccos(cosine_angle)
+                theta_results.append((angle, corner_1, corner_2))
+
+            greatest_combo = max(theta_results, key = lambda result: result[0])
+            max_theta = greatest_combo[0]
+            print(max_theta)
+
+        outmost = []
+
+        #outmost_corner_1 = ?
 
         # Strip any that are outside of the grid
 
-        return surroundings
+        class Context:
+            def __init__(self):
+                self.surroundings = surroundings
+                self.blocks = relevent_blocks
+                self.obscured = []
+
+        return Context()
 
     def add_block(self, block: tuple):
         self.blocks.add(block)

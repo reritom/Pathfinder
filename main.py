@@ -10,13 +10,17 @@ maze.add_block((int(N/2)+5, int(N/2)+5))
 images = []
 
 for i in range(0, 10):
-    surroundings = maze.get_surroundings((int(N/2) + i, int(N/2) + i), 30)
+    context = maze.get_surroundings((int(N/2) + i, int(N/2) + i), 30)
+    surroundings = context.surroundings
 
     # make an empty data set
     data = np.ones((N, N)) * np.nan
 
     for surrounding in surroundings:
         data[surrounding] = 1
+
+    for block in context.blocks:
+        data[block] = 2
 
     # make a figure + axes
     fig, ax = plt.subplots(1, 1, tight_layout=True)

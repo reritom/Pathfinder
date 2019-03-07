@@ -10,17 +10,22 @@ maze.add_block((int(N/2)+5, int(N/2)+5))
 images = []
 
 for i in range(0, 10):
-    context = maze.get_surroundings((int(N/2) + i, int(N/2) + i), 30)
-    surroundings = context.surroundings
+    context = maze.get_surroundings((int(N/2) -5 + i, int(N/2)), 15)
 
     # make an empty data set
     data = np.ones((N, N)) * np.nan
 
-    for surrounding in surroundings:
+    for surrounding in context.surroundings:
         data[surrounding] = 1
 
     for block in context.blocks:
         data[block] = 2
+
+    #for perim in context.perimeter:
+    #    data[perim] = 3
+    for outmost in context.outmost:
+        data[outmost] = 3
+    data[(int(N/2) -5 + i, int(N/2))] = 3
 
     # make a figure + axes
     fig, ax = plt.subplots(1, 1, tight_layout=True)
@@ -42,4 +47,4 @@ for i in range(0, 10):
     image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     images.append(image)
 
-imageio.mimsave('./test.gif', images, fps=1)
+imageio.mimsave('./test.gif', images, fps=2)

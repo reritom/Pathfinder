@@ -8,7 +8,7 @@ class Maze:
         self.blocks = set()
 
     def get_surroundings(self, position, view_range=1):
-        print("Getting surroundings of {}".format(position))
+        #print("Getting surroundings of {}".format(position))
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
 
@@ -76,9 +76,14 @@ class Maze:
             max_theta = greatest_combo[0]
             print(max_theta)
 
-        outmost = []
+            #print("Greatest combo {}".format(greatest_combo))
+            theta_to_corner_1 = self.angle_between(position, greatest_combo[1])
+            theta_to_corner_2 = self.angle_between(position, greatest_combo[2])
 
-        #outmost_corner_1 = ?
+            c1_outmost = (int(np.cos(theta_to_corner_1)*view_range) + position[0], int(np.sin(theta_to_corner_1)*view_range) + position[1])
+            c2_outmost = (int(np.cos(theta_to_corner_2)*view_range) + position[0], int(np.sin(theta_to_corner_2)*view_range) + position[1])
+
+            outmost = [c1_outmost, c2_outmost]
 
         # Strip any that are outside of the grid
 
@@ -87,6 +92,8 @@ class Maze:
                 self.surroundings = surroundings
                 self.blocks = relevent_blocks
                 self.obscured = []
+                self.perimeter = perimeter
+                self.outmost = outmost
 
         return Context()
 
@@ -95,6 +102,11 @@ class Maze:
 
     def remove_block(self, x, y):
         pass
+
+    @staticmethod
+    def angle_between(p1, p2):
+        theta = np.arctan2(p2[1] - p1[1], p2[0] - p1[0])
+        return theta
 
     def bresenhams_circle(self, centre_x: int, centre_y: int, radius: int) -> list:
         def clone_octant(centre_x, centre_y, x, y):
@@ -113,7 +125,7 @@ class Maze:
         y = radius
         d = 3 - 2 * radius
         boundaries = set()
-        boundaries = boundaries.union(clone_octant(centre_x, centre_x, x, y))
+        boundaries = boundaries.union(clone_octant(centre_x, centre_y, x, y))
 
         while (y >= x):
             x = x + 1
@@ -123,6 +135,6 @@ class Maze:
             else:
                 d = d + 4 * x + 6
 
-            boundaries = boundaries.union(clone_octant(centre_x, centre_x, x, y))
+            boundaries = boundaries.union(clone_octant(centre_x, centre_y, x, y))
 
         return boundaries

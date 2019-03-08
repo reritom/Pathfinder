@@ -7,6 +7,7 @@ import imageio
 N = 100
 maze = Maze(N, N)
 maze.add_block((int(N/2)+5, int(N/2)+5))
+maze.add_block((int(N/2)-5, int(N/2)-5))
 images = []
 
 for i in range(0, 10):
@@ -21,10 +22,16 @@ for i in range(0, 10):
     for block in context.blocks:
         data[block] = 2
 
+    for shadow in context.shadows:
+        data[shadow] = 2
+
     #for perim in context.perimeter:
     #    data[perim] = 3
+
     for outmost in context.outmost:
         data[outmost] = 3
+
+
     data[(int(N/2) -5 + i, int(N/2))] = 3
 
     # make a figure + axes
@@ -47,4 +54,4 @@ for i in range(0, 10):
     image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     images.append(image)
 
-imageio.mimsave('./test.gif', images, fps=2)
+imageio.mimsave('./test.gif', images, fps=5)

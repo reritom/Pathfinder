@@ -1,4 +1,5 @@
 import numpy as np
+import math as maths
 from itertools import combinations
 
 class Maze:
@@ -8,7 +9,17 @@ class Maze:
         self.blocks = set()
 
     def get_surroundings(self, position, view_range=1):
-        #print("Getting surroundings of {}".format(position))
+        class Context:
+            def __init__(self):
+                self.surroundings = set()
+                self.blocks = set()
+                self.obscured = set()
+                self.perimeter = set()
+                self.outmost = set()
+                self.shadows = set()
+
+        context = Context()
+
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
 
@@ -16,6 +27,7 @@ class Maze:
             return set(position)
 
         perimeter = self.bresenhams_circle(centre_x, centre_y, view_range)
+        context.perimeter = context.perimeter.union(perimeter)
 
         # We will fill the area within the perimeter
         surroundings = set().union(perimeter)
@@ -36,11 +48,16 @@ class Maze:
             else:
                 pass
 
+        # Add the filled surroundings to the context
+        context.surroundings = context.surroundings.union(surroundings)
+
         # Look for any blocks within our surroundings
         relevent_blocks = []
         for block in self.blocks:
             if block in surroundings:
                 relevent_blocks.append(block)
+
+        context.blocks = context.blocks.union(relevent_blocks)
 
         # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
         for block in relevent_blocks:
@@ -75,27 +92,29 @@ class Maze:
             greatest_combo = max(theta_results, key = lambda result: result[0])
             max_theta = greatest_combo[0]
             print(max_theta)
+            print(max_theta/(maths.pi*2*view_range*2)*1000)
 
             #print("Greatest combo {}".format(greatest_combo))
             theta_to_corner_1 = self.angle_between(position, greatest_combo[1])
             theta_to_corner_2 = self.angle_between(position, greatest_combo[2])
 
+
             c1_outmost = (int(np.cos(theta_to_corner_1)*view_range) + position[0], int(np.sin(theta_to_corner_1)*view_range) + position[1])
             c2_outmost = (int(np.cos(theta_to_corner_2)*view_range) + position[0], int(np.sin(theta_to_corner_2)*view_range) + position[1])
 
-            outmost = [c1_outmost, c2_outmost]
+            context.outmost.add(c1_outmost)
+            context.outmost.add(c2_outmost)
+
+            for theta_times_1000000 in range(int(theta_to_corner_1*1000000), int(theta_to_corner_2*1000000), int((max_theta/(maths.pi*2*view_range*2))*1000000)):
+                for double_radius in range(2*(view_range + 1)):
+                    radius = double_radius / 2
+                    theta = theta_times_1000000 / 1000000
+                    point = (maths.floor(np.cos(theta)*radius) + block[0], maths.floor(np.sin(theta)*radius) + block[1])
+                    context.shadows.add(point)
 
         # Strip any that are outside of the grid
 
-        class Context:
-            def __init__(self):
-                self.surroundings = surroundings
-                self.blocks = relevent_blocks
-                self.obscured = []
-                self.perimeter = perimeter
-                self.outmost = outmost
-
-        return Context()
+        return context
 
     def add_block(self, block: tuple):
         self.blocks.add(block)

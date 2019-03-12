@@ -9,7 +9,15 @@ import imageio
 N = 100
 maze = Maze(N, N)
 maze.add_block((int(N/2)+5, int(N/2)+5))
+
 maze.add_block((int(N/2)-5, int(N/2)-5))
+maze.add_block((int(N/2)-5, int(N/2)-6))
+maze.add_block((int(N/2)-5, int(N/2)-7))
+
+maze.add_block((int(N/2)-5, int(N/2)-5))
+maze.add_block((int(N/2)-6, int(N/2)-5))
+maze.add_block((int(N/2)-7, int(N/2)-5))
+
 images = []
 
 for i in range(0, 30):
@@ -25,8 +33,8 @@ for i in range(0, 30):
     for block in context.blocks:
         data[block] = 2
 
-    for shadow in context.shadows:
-        data[shadow] = 2
+    #for shadow in context.shadows:
+    #    data[shadow] = 2
 
     #for perim in context.perimeter:
     #    data[perim] = 3

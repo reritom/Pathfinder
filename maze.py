@@ -24,7 +24,7 @@ class Maze:
         centre_x, centre_y = position
 
         if view_range == 0:
-            return set(position)
+            return context
 
         perimeter = self.bresenhams_circle(centre_x, centre_y, view_range)
         context.perimeter = context.perimeter.union(perimeter)
@@ -60,7 +60,8 @@ class Maze:
         context.blocks = context.blocks.union(relevent_blocks)
 
         # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
-        for block in relevent_blocks:
+        for index, block in enumerate(relevent_blocks):
+            print("Looking at block {}".format(index))
             # From the centre, looks for the intercept of the corners of the block
             corners = [
                 np.array([block[0], block[1]]),
@@ -91,13 +92,14 @@ class Maze:
 
             greatest_combo = max(theta_results, key = lambda result: result[0])
             max_theta = greatest_combo[0]
-            print(max_theta)
-            print(max_theta/(maths.pi*2*view_range*2)*1000)
+            print("Max theta {}".format(max_theta))
+            print("Range {}".format(max_theta/(maths.pi*2*view_range*2)*1000000))
 
             #print("Greatest combo {}".format(greatest_combo))
             theta_to_corner_1 = self.angle_between(position, greatest_combo[1])
             theta_to_corner_2 = self.angle_between(position, greatest_combo[2])
-
+            print("Theta to corner 1 {}".format(theta_to_corner_1))
+            print("Theta to corner 2 {}".format(theta_to_corner_2))
 
             c1_outmost = (int(np.cos(theta_to_corner_1)*view_range) + position[0], int(np.sin(theta_to_corner_1)*view_range) + position[1])
             c2_outmost = (int(np.cos(theta_to_corner_2)*view_range) + position[0], int(np.sin(theta_to_corner_2)*view_range) + position[1])
@@ -105,12 +107,20 @@ class Maze:
             context.outmost.add(c1_outmost)
             context.outmost.add(c2_outmost)
 
-            for theta_times_1000000 in range(int(theta_to_corner_1*1000000), int(theta_to_corner_2*1000000), int((max_theta/(maths.pi*2*view_range*2))*1000000)):
+            # We need to ensure the next iteration range goes from min the max
+            min_corner_theta = min([theta_to_corner_1, theta_to_corner_2])
+            max_corner_theta = max([theta_to_corner_1, theta_to_corner_2])
+
+            count = 0
+            for theta_times_1000000 in range(int(min_corner_theta*1000000), int(max_corner_theta*1000000), int((max_theta/(maths.pi*2*view_range*2))*1000000)):
                 for double_radius in range(2*(view_range + 1)):
                     radius = double_radius / 2
                     theta = theta_times_1000000 / 1000000
                     point = (maths.floor(np.cos(theta)*radius) + block[0], maths.floor(np.sin(theta)*radius) + block[1])
                     context.shadows.add(point)
+                count = count + 1
+
+            print("Length of shadows {} {}".format(len(context.shadows), count))
 
         # Strip any that are outside of the grid
 

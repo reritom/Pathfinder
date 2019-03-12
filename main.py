@@ -1,5 +1,7 @@
 from maze import Maze
 import numpy as np
+import matplotlib
+matplotlib.use('TkAgg') # This is to avoid a python macos issue with rendering the canvas
 import matplotlib.pyplot as plt
 import matplotlib
 import imageio
@@ -10,7 +12,8 @@ maze.add_block((int(N/2)+5, int(N/2)+5))
 maze.add_block((int(N/2)-5, int(N/2)-5))
 images = []
 
-for i in range(0, 10):
+for i in range(0, 30):
+    print("Round {}".format(i))
     context = maze.get_surroundings((int(N/2) -5 + i, int(N/2)), 15)
 
     # make an empty data set

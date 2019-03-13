@@ -2,16 +2,71 @@ from .tools import surroundings_of
 
 class Context:
     def __init__(self):
-        self.surroundings = set()
-        self.blocks = set()
-        self.obscured = set()
-        self.perimeter = set()
-        self.outmost = set()
-        self.shadows = set()
+        self.points = {
+            'surroundings': set(),
+            'blocks': set(),
+            'obscured': set(),
+            'perimeter': set(),
+            'outmost': set(),
+            'shadows': set()
+        }
+
+    @property
+    def surroundings(self):
+        return self.points['surroundings']
+
+    @surroundings.setter
+    def surroundings(self, value):
+        self.points['surroundings'] = value
+
+    @property
+    def blocks(self):
+        return self.points['blocks']
+
+    @blocks.setter
+    def blocks(self, value):
+        self.points['blocks'] = value
+
+    @property
+    def obscured(self):
+        return self.points['obscured']
+
+    @obscured.setter
+    def obscured(self, value):
+        self.points['obscured'] = value
+
+    @property
+    def perimeter(self):
+        return self.points['perimeter']
+
+    @perimeter.setter
+    def perimeter(self, value):
+        self.points['perimeter'] = value
+
+    @property
+    def outmost(self):
+        return self.points['outmost']
+
+    @outmost.setter
+    def outmost(self, value):
+        self.points['outmost'] = value
+
+    @property
+    def shadows(self):
+        return self.points['shadows']
+
+    @shadows.setter
+    def shadows(self, value):
+        self.points['shadows'] = value
 
     def clean(self, x, y):
-        self.x = x
-        self.y = y
+        # Determine the obscured points
+        for shadow in self.shadows:
+            surrounding_points = surroundings_of(shadow)
+            for surrounding_point in surrounding_points:
+                if surrounding_point in self.surroundings:
+                    self.obscured.add(shadow)
+                    break
 
         # Discard things from the surroundings
         for block in self.blocks:
@@ -23,49 +78,16 @@ class Context:
         for obscured in self.obscured:
             self.surroundings.discard(obscured)
 
-        # Strip any surroundings outside of the grid
-        surroundings_to_pop = list()
-        for surrounding in self.surroundings:
-            if surrounding[0] < 0 or surrounding[0] > self.x:
-                surroundings_to_pop.append(surrounding)
-                continue
-            if surrounding[1] < 0 or surrounding[1] > self.y:
-                surroundings_to_pop.append(surrounding)
-                continue
+        # Strip any points outside of the grid
+        for key in self.points.keys():
+            points_to_pop = list()
+            for point in self.points[key]:
+                if point[0] < 0 or point[0] > x:
+                    points_to_pop.append(point)
+                    continue
+                if point[1] < 0 or point[1] > y:
+                    points_to_pop.append(point)
+                    continue
 
-        for surrounding in surroundings_to_pop:
-            self.surroundings.discard(surrounding)
-
-        # Strip any outmost outside the grid
-        outmost_to_pop = list()
-        for outmost in self.outmost:
-            if outmost[0] < 0 or outmost[0] > self.x:
-                outmost_to_pop.append(outmost)
-                continue
-            if outmost[1] < 0 or outmost[1] > self.y:
-                outmost_to_pop.append(outmost)
-                continue
-
-        for outmost in outmost_to_pop:
-            self.outmost.discard(outmost)
-
-        # Determine the obscured points
-        for shadow in self.shadows:
-            surrounding_points = surroundings_of(shadow)
-            for surrounding_point in surrounding_points:
-                if surrounding_point in self.surroundings:
-                    self.obscured.add(shadow)
-                    break
-
-        # Strip any obscured which are outside of the grid
-        obscured_to_pop = list()
-        for obscured in self.obscured:
-            if obscured[0] < 0 or obscured[0] > self.x:
-                obscured_to_pop.append(obscured)
-                continue
-            if obscured[1] < 0 or obscured[1] > self.y:
-                obscured_to_pop.append(obscured)
-                continue
-
-        for obscured in obscured_to_pop:
-            self.obscured.discard(obscured)
+            for point in points_to_pop:
+                self.points[key].discard(point)

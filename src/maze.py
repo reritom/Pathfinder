@@ -1,64 +1,22 @@
 import numpy as np
 import math as maths
 from itertools import combinations
-
-class Context:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-        self.surroundings = set()
-        self.blocks = set()
-        self.obscured = set()
-        self.perimeter = set()
-        self.outmost = set()
-        self.shadows = set()
-
-    def clean(self):
-        # Discard things from the surroundings
-        for block in self.blocks:
-            self.surroundings.discard(block)
-
-        for shadow in self.shadows:
-            self.surroundings.discard(shadow)
-
-        for block in self.blocks:
-            self.surroundings.discard(block)
-
-        # Strip any surroundings outside of the grid
-        surroundings_to_pop = list()
-        for surrounding in self.surroundings:
-            if surrounding[0] < 0 or surrounding[0] > self.x:
-                surroundings_to_pop.append(surrounding)
-                continue
-            if surrounding[1] < 0 or surrounding[1] > self.y:
-                surroundings_to_pop.append(surrounding)
-                continue
-
-        for surrounding in surroundings_to_pop:
-            self.surroundings.discard(surrounding)
-
-        # Strip any outmost outside the grid
-        outmost_to_pop = list()
-        for outmost in self.outmost:
-            if outmost[0] < 0 or outmost[0] > self.x:
-                outmost_to_pop.append(outmost)
-                continue
-            if outmost[1] < 0 or outmost[1] > self.y:
-                outmost_to_pop.append(outmost)
-                continue
-
-        for outmost in outmost_to_pop:
-            self.outmost.discard(outmost)
+from .context import Context
 
 class Maze:
+    @classmethod
+    def from_file(cls, filepath):
+        with open(filename, 'r') as f:
+            pass
+        instance = cls()
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.blocks = set()
 
     def get_surroundings(self, position, view_range=1):
-        context = Context(self.x, self.y)
+        context = Context()
 
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
@@ -151,17 +109,19 @@ class Maze:
             min_corner_theta = min([theta_to_corner_1, theta_to_corner_2])
             max_corner_theta = max([theta_to_corner_1, theta_to_corner_2])
 
-            for theta_times_1000000 in range(int(min_corner_theta*1000000), int(max_corner_theta*1000000), int((max_theta/(maths.pi*2*view_range*2))*1000000)):
+            theta_range = range(int(min_corner_theta*1_000_000), int(max_corner_theta*1_000_000), int((max_theta/(maths.pi*2*view_range*2))*1_000_000))
+
+            for theta_times_1000000 in theta_range:
                 for double_radius in range(2*(view_range + 1)):
                     radius = double_radius / 2
-                    theta = theta_times_1000000 / 1000000
+                    theta = theta_times_1000000 / 1_000_000
                     point = (maths.floor(np.cos(theta)*radius) + block[0], maths.floor(np.sin(theta)*radius) + block[1])
                     context.shadows.add(point)
 
             print("Length of shadows {}".format(len(context.shadows)))
 
         # Strip any that are outside of the grid
-        context.clean()
+        context.clean(self.x, self.y)
 
         return context
 

@@ -1,4 +1,4 @@
-from maze import Maze
+from src.maze import Maze
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg') # This is to avoid a python macos issue with rendering the canvas
@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import imageio
 
-N = 100
+N = 150
 maze = Maze(N, N)
 maze.add_block((int(N/2)+5, int(N/2)+5))
 
@@ -36,11 +36,14 @@ for i in range(0, 30):
     #for shadow in context.shadows:
     #    data[shadow] = 2
 
+    #for obscured in context.obscured:
+    #    data[obscured] = 3
+
     #for perim in context.perimeter:
     #    data[perim] = 3
 
-    for outmost in context.outmost:
-        data[outmost] = 3
+    #for outmost in context.outmost:
+    #    data[outmost] = 3
 
 
     data[(int(N/2) -5 + i, int(N/2))] = 3

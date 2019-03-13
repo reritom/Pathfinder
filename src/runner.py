@@ -3,11 +3,11 @@ class Runner:
         self.maze = maze
         self.bot = bot
 
-    def add_event(self, iteration):
+    def add_event(self, iteration, event):
         # For making the maze dynamic
         pass
 
-    def run(self, max=1000):
+    def run(self, max=1000, to_gif=True, gif_path='./test.gif', gif_fps=5):
         iterations = 0
 
         while iterations < max:

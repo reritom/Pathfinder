@@ -5,5 +5,5 @@ class Bot:
 
         self.previous_positions = []
 
-    def run_round(self, )
-
+    def run_round(self, context):
+        pass

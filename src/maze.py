@@ -6,9 +6,24 @@ from .context import Context
 class Maze:
     @classmethod
     def from_file(cls, filepath):
-        with open(filename, 'r') as f:
-            pass
-        instance = cls()
+        with open(filepath, 'r') as f:
+            lines = f.readlines()
+
+        y = len(lines)
+        x = len(lines[0])
+
+        print("Maze x {}".format(x))
+        print("Maze y {}".format(y))
+
+
+        instance = cls(x=x, y=y)
+
+        for y_index, line in enumerate(lines):
+            for x_index, value in enumerate(line):
+                if value == 'x':
+                    instance.blocks.add((x_index, y-y_index))
+
+        return instance
 
     def __init__(self, x, y):
         self.x = x
@@ -21,7 +36,7 @@ class Maze:
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
 
-        if view_range == 0:
+        if view_range == 0 or position in self.blocks:
             return context
 
         perimeter = self.bresenhams_circle(centre_x, centre_y, view_range)
@@ -48,6 +63,7 @@ class Maze:
 
         # Add the filled surroundings to the context
         context.surroundings = context.surroundings.union(surroundings)
+        print('Surroundings are {}'.format(len(context.surroundings)))
 
         # Look for any blocks within our surroundings
         relevent_blocks = []
@@ -58,8 +74,9 @@ class Maze:
         context.blocks = context.blocks.union(relevent_blocks)
 
         # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
+        print("There are {} relevent blocks".format(len(relevent_blocks)))
         for index, block in enumerate(relevent_blocks):
-            print("Looking at block {}".format(index))
+            #print("Looking at block {}".format(index))
             # From the centre, looks for the intercept of the corners of the block
             corners = [
                 np.array([block[0], block[1]]),
@@ -90,13 +107,13 @@ class Maze:
 
             greatest_combo = max(theta_results, key = lambda result: result[0])
             max_theta = greatest_combo[0]
-            print("Max theta {}".format(max_theta))
-            print("Range {}".format(max_theta/(maths.pi*2*view_range*2)*1000000))
+            #print("Max theta {}".format(max_theta))
+            #print("Range {}".format(max_theta/(maths.pi*2*view_range*2)*1000000))
 
             theta_to_corner_1 = self.angle_between(position, greatest_combo[1])
             theta_to_corner_2 = self.angle_between(position, greatest_combo[2])
-            print("Theta to corner 1 {}".format(theta_to_corner_1))
-            print("Theta to corner 2 {}".format(theta_to_corner_2))
+            #print("Theta to corner 1 {}".format(theta_to_corner_1))
+            #print("Theta to corner 2 {}".format(theta_to_corner_2))
 
             # These arent needed but look nice on the plots
             c1_outmost = (int(np.cos(theta_to_corner_1)*view_range) + position[0], int(np.sin(theta_to_corner_1)*view_range) + position[1])
@@ -118,10 +135,12 @@ class Maze:
                     point = (maths.floor(np.cos(theta)*radius) + block[0], maths.floor(np.sin(theta)*radius) + block[1])
                     context.shadows.add(point)
 
-            print("Length of shadows {}".format(len(context.shadows)))
+        print("Length of shadows {}".format(len(context.shadows)))
 
         # Strip any that are outside of the grid
         context.clean(self.x, self.y)
+        print("Length of shadows after clean {}".format(len(context.shadows)))
+        print('Length of surroundings after clean {}'.format(len(context.surroundings)))
 
         return context
 

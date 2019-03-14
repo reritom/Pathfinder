@@ -6,35 +6,30 @@ import matplotlib.pyplot as plt
 import matplotlib
 import imageio
 
-N = 150
-maze = Maze(N, N)
-maze.add_block((int(N/2)+5, int(N/2)+5))
-
-maze.add_block((int(N/2)-5, int(N/2)-5))
-maze.add_block((int(N/2)-5, int(N/2)-6))
-maze.add_block((int(N/2)-5, int(N/2)-7))
-
-maze.add_block((int(N/2)-5, int(N/2)-5))
-maze.add_block((int(N/2)-6, int(N/2)-5))
-maze.add_block((int(N/2)-7, int(N/2)-5))
+maze = Maze.from_file('example.txt')
+print('There are {} blocks total'.format(len(maze.blocks)))
 
 images = []
 
-for i in range(0, 30):
+for i in range(0, 20):
     print("Round {}".format(i))
-    context = maze.get_surroundings((int(N/2) -5 + i, int(N/2)), 15)
+    pos = (i, i)
+    context = maze.get_surroundings(pos, 4)
 
     # make an empty data set
-    data = np.ones((N, N)) * np.nan
+    data = np.ones((maze.x + 1, maze.y + 1)[::-1]) * np.nan
 
     for surrounding in context.surroundings:
-        data[surrounding] = 1
+        data[surrounding[::-1]] = 0
 
     for block in context.blocks:
-        data[block] = 2
+        data[block[::-1]] = 1
 
     #for shadow in context.shadows:
-    #    data[shadow] = 2
+    #    data[shadow[::-1]] = 4
+
+    for block in maze.blocks:
+        data[block[::-1]] = 2
 
     #for obscured in context.obscured:
     #    data[obscured] = 3
@@ -46,26 +41,30 @@ for i in range(0, 30):
     #    data[outmost] = 3
 
 
-    data[(int(N/2) -5 + i, int(N/2))] = 3
+    data[pos[::-1]] = 3
 
     # make a figure + axes
     fig, ax = plt.subplots(1, 1, tight_layout=True)
     # make color map
-    my_cmap = matplotlib.colors.ListedColormap(['r', 'g', 'b'])
+    my_cmap = matplotlib.colors.ListedColormap(['red', 'green', 'blue', 'black', 'yellow'])
     # set the 'bad' values (nan) to be white and transparent
     my_cmap.set_bad(color='w', alpha=0)
     # draw the grid
-    for x in range(N + 1):
-        ax.axhline(x, lw=0, color='k', zorder=5)
-        ax.axvline(x, lw=0, color='k', zorder=5)
+    N = max([maze.x, maze.y])
+
+    for x in range(maze.x):
+        for y in range(maze.y):
+            ax.axhline(x, lw=0, color='k', zorder=5)
+            ax.axvline(y, lw=0, color='k', zorder=5)
     # draw the boxes
-    ax.imshow(data, interpolation='none', cmap=my_cmap, extent=[0, N, 0, N], zorder=0)
+    ax.imshow(data, interpolation='none', cmap=my_cmap, extent=[0, maze.x, 0, maze.y], zorder=0)
     # turn off the axis labels
-    ax.axis('off')
+    #ax.axis('off')
+    ax.invert_yaxis()
 
     fig.canvas.draw()       # draw the canvas, cache the renderer
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
     image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     images.append(image)
 
-imageio.mimsave('./test1.gif', images, fps=5)
+imageio.mimsave('./test.gif', images, fps=1)

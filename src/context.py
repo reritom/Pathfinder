@@ -61,31 +61,43 @@ class Context:
 
     def clean(self, x, y):
         # Determine the obscured points
+        '''
         for shadow in self.shadows:
             surrounding_points = surroundings_of(shadow)
             for surrounding_point in surrounding_points:
                 if surrounding_point in self.surroundings:
                     self.obscured.add(shadow)
                     break
-
+        '''
         # Discard things from the surroundings
         for block in self.blocks:
             self.surroundings.discard(block)
 
+        '''
         for shadow in self.shadows:
             self.surroundings.discard(shadow)
 
         for obscured in self.obscured:
             self.surroundings.discard(obscured)
 
+        # Remove any shadows not in the surroundings
+        shadows_to_remove = []
+        for shadow in self.shadows:
+            if shadow not in self.surroundings:
+                shadows_to_remove.append(shadow)
+
+        for shadow in shadows_to_remove:
+            self.shadows.discard(shadow)
+        '''
+
         # Strip any points outside of the grid
         for key in self.points.keys():
             points_to_pop = list()
             for point in self.points[key]:
-                if point[0] < 0 or point[0] > x:
+                if point[0] < 0 or point[0] >= x:
                     points_to_pop.append(point)
                     continue
-                if point[1] < 0 or point[1] > y:
+                if point[1] < 0 or point[1] >= y:
                     points_to_pop.append(point)
                     continue
 

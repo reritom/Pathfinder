@@ -28,9 +28,17 @@ class Maze:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.rendered = False
         self.blocks = set()
 
+    def render_polygons(self):
+        # Render polygons representing groups of blocks
+        self.rendered = True
+
     def get_surroundings(self, position, view_range=1):
+        if not self.rendered:
+            raise Exception("Maze needs rendering prior to retrieving surroundings")
+            
         context = Context()
 
         # For a given position, return the surrounding positions
@@ -73,74 +81,8 @@ class Maze:
 
         context.blocks = context.blocks.union(relevent_blocks)
 
-        # For each relevent block, determine which of the surroundings it shadows, and those that aren't fully clear
-        print("There are {} relevent blocks".format(len(relevent_blocks)))
-        for index, block in enumerate(relevent_blocks):
-            #print("Looking at block {}".format(index))
-            # From the centre, looks for the intercept of the corners of the block
-            corners = [
-                np.array([block[0], block[1]]),
-                np.array([block[0] + 1, block[1]]),
-                np.array([block[0], block[1] + 1]),
-                np.array([block[0] + 1, block[1] + 1])
-            ]
-
-            centre = np.array([centre_x + 0.5, centre_y + 0.5])
-
-            # List of different combinations of two corners
-            mixes = combinations(corners, 2)
-
-            # Find the greatest angle between two corners
-            theta_results = []
-
-            for combo in mixes:
-                corner_1 = combo[0]
-                corner_2 = combo[1]
-
-                # Normalise the two points relative to the centre
-                c1_centre = corner_1 - centre
-                c2_centre = corner_2 - centre
-
-                cosine_angle = np.dot(c1_centre, c2_centre) / (np.linalg.norm(c1_centre) * np.linalg.norm(c2_centre))
-                angle = np.arccos(cosine_angle)
-                theta_results.append((angle, corner_1, corner_2))
-
-            greatest_combo = max(theta_results, key = lambda result: result[0])
-            max_theta = greatest_combo[0]
-            #print("Max theta {}".format(max_theta))
-            #print("Range {}".format(max_theta/(maths.pi*2*view_range*2)*1000000))
-
-            theta_to_corner_1 = self.angle_between(position, greatest_combo[1])
-            theta_to_corner_2 = self.angle_between(position, greatest_combo[2])
-            #print("Theta to corner 1 {}".format(theta_to_corner_1))
-            #print("Theta to corner 2 {}".format(theta_to_corner_2))
-
-            # These arent needed but look nice on the plots
-            c1_outmost = (int(np.cos(theta_to_corner_1)*view_range) + position[0], int(np.sin(theta_to_corner_1)*view_range) + position[1])
-            c2_outmost = (int(np.cos(theta_to_corner_2)*view_range) + position[0], int(np.sin(theta_to_corner_2)*view_range) + position[1])
-
-            context.outmost.add(c1_outmost)
-            context.outmost.add(c2_outmost)
-
-            # We need to ensure the next iteration range goes from min the max
-            min_corner_theta = min([theta_to_corner_1, theta_to_corner_2])
-            max_corner_theta = max([theta_to_corner_1, theta_to_corner_2])
-
-            theta_range = range(int(min_corner_theta*1_000_000), int(max_corner_theta*1_000_000), int((max_theta/(maths.pi*2*view_range*2))*1_000_000))
-
-            for theta_times_1000000 in theta_range:
-                for double_radius in range(2*(view_range + 1)):
-                    radius = double_radius / 2
-                    theta = theta_times_1000000 / 1_000_000
-                    point = (maths.floor(np.cos(theta)*radius) + block[0], maths.floor(np.sin(theta)*radius) + block[1])
-                    context.shadows.add(point)
-
-        print("Length of shadows {}".format(len(context.shadows)))
-
         # Strip any that are outside of the grid
         context.clean(self.x, self.y)
-        print("Length of shadows after clean {}".format(len(context.shadows)))
-        print('Length of surroundings after clean {}'.format(len(context.surroundings)))
 
         return context
 
@@ -149,13 +91,11 @@ class Maze:
             if block[1] > 0 and block[1] < self.y:
                 self.blocks.add(block)
 
+        self.rendered = False
+
     def remove_block(self, block: tuple):
         self.blocks.discard(block)
-
-    @staticmethod
-    def angle_between(p1, p2):
-        theta = np.arctan2(p2[1] - p1[1], p2[0] - p1[0])
-        return theta
+        self.rendered = False
 
     def bresenhams_circle(self, centre_x: int, centre_y: int, radius: int) -> list:
         def clone_octant(centre_x, centre_y, x, y):

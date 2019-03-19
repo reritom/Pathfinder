@@ -5,10 +5,7 @@ class Context:
         self.points = {
             'surroundings': set(),
             'blocks': set(),
-            'obscured': set(),
             'perimeter': set(),
-            'outmost': set(),
-            'shadows': set()
         }
 
     @property
@@ -28,14 +25,6 @@ class Context:
         self.points['blocks'] = value
 
     @property
-    def obscured(self):
-        return self.points['obscured']
-
-    @obscured.setter
-    def obscured(self, value):
-        self.points['obscured'] = value
-
-    @property
     def perimeter(self):
         return self.points['perimeter']
 
@@ -43,53 +32,7 @@ class Context:
     def perimeter(self, value):
         self.points['perimeter'] = value
 
-    @property
-    def outmost(self):
-        return self.points['outmost']
-
-    @outmost.setter
-    def outmost(self, value):
-        self.points['outmost'] = value
-
-    @property
-    def shadows(self):
-        return self.points['shadows']
-
-    @shadows.setter
-    def shadows(self, value):
-        self.points['shadows'] = value
-
     def clean(self, x, y):
-        # Determine the obscured points
-        '''
-        for shadow in self.shadows:
-            surrounding_points = surroundings_of(shadow)
-            for surrounding_point in surrounding_points:
-                if surrounding_point in self.surroundings:
-                    self.obscured.add(shadow)
-                    break
-        '''
-        # Discard things from the surroundings
-        for block in self.blocks:
-            self.surroundings.discard(block)
-
-        '''
-        for shadow in self.shadows:
-            self.surroundings.discard(shadow)
-
-        for obscured in self.obscured:
-            self.surroundings.discard(obscured)
-
-        # Remove any shadows not in the surroundings
-        shadows_to_remove = []
-        for shadow in self.shadows:
-            if shadow not in self.surroundings:
-                shadows_to_remove.append(shadow)
-
-        for shadow in shadows_to_remove:
-            self.shadows.discard(shadow)
-        '''
-
         # Strip any points outside of the grid
         for key in self.points.keys():
             points_to_pop = list()

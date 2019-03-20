@@ -2,6 +2,7 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
+from .tools import LineSet, Line
 
 class Maze:
     @classmethod
@@ -23,6 +24,7 @@ class Maze:
                 if value == 'x':
                     instance.blocks.add((x_index, y-y_index))
 
+        instance.render_lines()
         return instance
 
     def __init__(self, x, y):
@@ -30,15 +32,42 @@ class Maze:
         self.y = y
         self.rendered = False
         self.blocks = set()
+        self.lines = LineSet()
 
-    def render_polygons(self):
-        # Render polygons representing groups of blocks
+    def render_lines(self):
+        lines = []
+
+        # Add the border lines
+        lines.extend(
+            [
+                Line((0, 0), (self.x+1, 0)),
+                Line((0, 0), (0, self.y+1)),
+                Line((self.x+1, 0), (self.x+1, self.y+1)),
+                Line((0, self.y+1), (self.x+1, self.y+1))
+            ]
+        )
+
+        # Add the lines surrounding blocks
+        for block in self.blocks:
+            x, y = block
+
+            lines.extend(
+                [
+                    Line((x, y), (x, y+1)),
+                    Line((x, y), (x+1, y)),
+                    Line((x+1, y), (x+1, y+1)),
+                    Line((x, y+1), (x+1, y+1))
+                ]
+            )
+
+        self.lines.extend(lines)
+        print("Block count {} line count {}".format(len(self.blocks), len(self.lines)))
         self.rendered = True
 
     def get_surroundings(self, position, view_range=1):
         if not self.rendered:
             raise Exception("Maze needs rendering prior to retrieving surroundings")
-            
+
         context = Context()
 
         # For a given position, return the surrounding positions

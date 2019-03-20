@@ -8,7 +8,7 @@ import imageio
 
 maze = Maze.from_file('example.txt')
 print('There are {} blocks total'.format(len(maze.blocks)))
-
+'''
 # make a figure + axes
 fig, ax = plt.subplots(1, 1, tight_layout=True)
 # make color map
@@ -62,3 +62,4 @@ for i in range(0, 20):
     print("Finished plot")
 
 imageio.mimsave('./test.gif', images, fps=1)
+'''

@@ -23,7 +23,7 @@ class TestLine(unittest.TestCase):
             (0, 0)
         )
 
-        line_set = LineSet()
+        line_set = LineSet(remove_duplicates=True)
         line_set.add(line)
 
         self.assertTrue(line in line_set)
@@ -38,7 +38,7 @@ class TestLine(unittest.TestCase):
         self.assertEqual(len(line_set), 1)
 
     def test_line_set_extend(self):
-        line_set = LineSet()
+        line_set = LineSet(remove_duplicates=True)
         x, y = 0, 0
 
         lines = [

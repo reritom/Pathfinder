@@ -60,8 +60,13 @@ class Maze:
                 ]
             )
 
+        # Add the lines to the list
         self.lines.extend(lines)
-        print("Block count {} line count {}".format(len(self.blocks), len(self.lines)))
+
+        dupe_free = self.lines.get_duplicate_free()
+
+        print("Block count {} line count {}".format(len(self.blocks), len(dupe_free)))
+        print("Dupes {}".format(len(self.lines.duplicates)))
         self.rendered = True
 
     def get_surroundings(self, position, view_range=1):

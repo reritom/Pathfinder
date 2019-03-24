@@ -6,7 +6,16 @@ class Context:
             'surroundings': set(),
             'blocks': set(),
             'perimeter': set(),
+            'intersects': set()
         }
+
+    @property
+    def intersects(self):
+        return self.points['intersects']
+
+    @intersects.setter
+    def intersects(self, value):
+        self.points['intersects'] = value
 
     @property
     def surroundings(self):

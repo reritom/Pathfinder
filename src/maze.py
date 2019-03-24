@@ -2,7 +2,8 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
-from .tools import LineSet, Line
+from .tools import LineSet, Line, merge_lines, line_from_radial, get_magnitude, get_intersection
+from typing import List
 
 class Maze:
     @classmethod
@@ -15,7 +16,6 @@ class Maze:
 
         print("Maze x {}".format(x))
         print("Maze y {}".format(y))
-
 
         instance = cls(x=x, y=y)
 
@@ -32,9 +32,10 @@ class Maze:
         self.y = y
         self.rendered = False
         self.blocks = set()
-        self.lines = LineSet()
+        self.lines = list()
+        self.points = set()
 
-    def render_lines(self):
+    def render_lines(self) -> None:
         lines = []
 
         # Add the border lines
@@ -61,17 +62,29 @@ class Maze:
             )
 
         # Add the lines to the list
-        self.lines.extend(lines)
+        line_set = LineSet()
+        line_set.extend(lines)
 
-        dupe_free = self.lines.get_duplicate_free()
+        print("Len before getting dupe free {}".format(len(lines)))
+
+        dupe_free = line_set.get_duplicate_free()
 
         print("Block count {} line count {}".format(len(self.blocks), len(dupe_free)))
-        print("Dupes {}".format(len(self.lines.duplicates)))
+        print("Dupes {}".format(len(line_set.duplicates)))
+
+        # Now some lines can be merged
+        lines = merge_lines(dupe_free)
+        self.lines = lines
+
+        for line in self.lines:
+            self.points.add(line.a)
+            self.points.add(line.b)
+
         self.rendered = True
 
-    def get_surroundings(self, position, view_range=1):
+    def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
         if not self.rendered:
-            raise Exception("Maze needs rendering prior to retrieving surroundings")
+            raise Exception("Maze needs rendering prior to getting surroundings")
 
         context = Context()
 
@@ -107,27 +120,63 @@ class Maze:
         context.surroundings = context.surroundings.union(surroundings)
         print('Surroundings are {}'.format(len(context.surroundings)))
 
-        # Look for any blocks within our surroundings
-        relevent_blocks = []
-        for block in self.blocks:
-            if block in surroundings:
-                relevent_blocks.append(block)
+        # Look at all the unique points of the block borders
+        unique_angles = set()
+        for point in self.points:
+            angle = maths.atan2(point[1]-centre_y, point[0]-centre_x)
+            unique_angles.add(angle-0.00001)
+            unique_angles.add(angle)
+            unique_angles.add(angle+0.00001)
 
-        context.blocks = context.blocks.union(relevent_blocks)
+        unique_angles = sorted(unique_angles)
+        print("{} angles".format(len(unique_angles)))
+        print("{} lines".format(len(self.lines)))
+
+        intersects = []
+        for angle in unique_angles:
+            # Create a line for this angle
+            ray = line_from_radial(position, angle, self.x*self.y)
+
+            # Get the intersections for this ray
+            closest_magnitude = None
+            closest_point = None
+            for line in self.lines:
+                point_of_intersection = get_intersection(ray, line)
+
+                # If there is no intersection, move to the next line
+                if not point_of_intersection:
+                    #print("No intersection")
+                    continue
+
+                print("There is an intersection")
+                magnitude = get_magnitude(Line(position, point_of_intersection))
+
+                if closest_magnitude is None or magnitude < closest_magnitude:
+                    closest_magnitude = magnitude
+                    closest_point = point_of_intersection
+
+            if not closest_point:
+                continue
+
+            intersects.append(closest_point)
+
+        context.intersects = intersects
+        print("Il y a {} intersections".format(len(intersects)))
+
 
         # Strip any that are outside of the grid
         context.clean(self.x, self.y)
 
         return context
 
-    def add_block(self, block: tuple):
+    def add_block(self, block: tuple) -> None:
         if block[0] > 0 and block[0] < self.x:
             if block[1] > 0 and block[1] < self.y:
                 self.blocks.add(block)
 
         self.rendered = False
 
-    def remove_block(self, block: tuple):
+    def remove_block(self, block: tuple) -> None:
         self.blocks.discard(block)
         self.rendered = False
 

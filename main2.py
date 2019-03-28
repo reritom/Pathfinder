@@ -5,8 +5,16 @@ matplotlib.use('TkAgg') # This is to avoid a python macos issue with rendering t
 import matplotlib.pyplot as plt
 import matplotlib
 import imageio
+import os
 
-maze = Maze.from_file('example2.txt')
+maze = Maze.from_file(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'mazes',
+        'complex.txt'
+    )
+)
+
 print('There are {} blocks total'.format(len(maze.blocks)))
 print('There are {} lines'.format(len(maze.lines)))
 
@@ -21,8 +29,7 @@ for i in range(0, 20):
     # make an empty data set
     data = np.ones((maze.x + 1, maze.y + 1)[::-1]) * np.nan
 
-    for surrounding in context.surroundings:
-        data[surrounding[::-1]] = 0
+
 
     for block in context.blocks:
         data[block[::-1]] = 1
@@ -30,8 +37,12 @@ for i in range(0, 20):
     for block in maze.blocks:
         data[block[::-1]] = 2
 
-    for intersect in context.intersects:
-        data[intersect[::-1]] = 2
+    for surrounding in context.surroundings:
+        data[surrounding[::-1]] = 0
+
+
+    #for intersect in context.intersects:
+    #    data[intersect[::-1]] = 2
 
     #for perim in context.perimeter:
     #    data[perim] = 3

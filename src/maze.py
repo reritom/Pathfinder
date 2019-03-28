@@ -2,7 +2,7 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
-from .tools import LineSet, Line, merge_lines, line_from_radial, get_magnitude, get_intersection
+from .tools import LineSet, Line, merge_lines, line_from_radial, get_magnitude, get_intersection, lies_between, centre_of, is_adjacent
 from typing import List
 
 class Maze:
@@ -80,6 +80,11 @@ class Maze:
             self.points.add(line.a)
             self.points.add(line.b)
 
+        self.points.add((0, 0))
+        self.points.add((0, self.y))
+        self.points.add((self.x, 0))
+        self.points.add((self.x, self.y))
+
         self.rendered = True
 
     def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
@@ -87,6 +92,7 @@ class Maze:
             raise Exception("Maze needs rendering prior to getting surroundings")
 
         context = Context()
+        context.blocks = self.blocks
 
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
@@ -120,49 +126,17 @@ class Maze:
         context.surroundings = context.surroundings.union(surroundings)
         print('Surroundings are {}'.format(len(context.surroundings)))
 
-        # Look at all the unique points of the block borders
-        unique_angles = set()
-        for point in self.points:
-            angle = maths.atan2(point[1]-centre_y, point[0]-centre_x)
-            unique_angles.add(angle-0.00001)
-            unique_angles.add(angle)
-            unique_angles.add(angle+0.00001)
+        relevent_blocks = {block for block in self.blocks if block in surroundings}
+        shadows = set()
 
-        unique_angles = sorted(unique_angles)
-        print("{} angles".format(len(unique_angles)))
-        print("{} lines".format(len(self.lines)))
+        for surrounding in surroundings:
+            for block in relevent_blocks:
+                if not is_adjacent(block, position):
+                    if lies_between(centre_of(block), centre_of(surrounding), centre_of(position)):
+                        shadows.add(surrounding)
 
-        intersects = []
-        for angle in unique_angles:
-            # Create a line for this angle
-            ray = line_from_radial(position, angle, self.x*self.y)
-
-            # Get the intersections for this ray
-            closest_magnitude = None
-            closest_point = None
-            for line in self.lines:
-                point_of_intersection = get_intersection(ray, line)
-
-                # If there is no intersection, move to the next line
-                if not point_of_intersection:
-                    #print("No intersection")
-                    continue
-
-                print("There is an intersection")
-                magnitude = get_magnitude(Line(position, point_of_intersection))
-
-                if closest_magnitude is None or magnitude < closest_magnitude:
-                    closest_magnitude = magnitude
-                    closest_point = point_of_intersection
-
-            if not closest_point:
-                continue
-
-            intersects.append(closest_point)
-
-        context.intersects = intersects
-        print("Il y a {} intersections".format(len(intersects)))
-
+        for shadow in shadows:
+            context.surroundings.discard(shadow)
 
         # Strip any that are outside of the grid
         context.clean(self.x, self.y)

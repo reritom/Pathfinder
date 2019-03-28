@@ -1,4 +1,4 @@
-from .tools import Line, merge_lines, get_intersection, line_from_radial
+from .tools import Line, merge_lines, get_intersection, line_from_radial, lies_between, get_magnitude, is_adjacent, is_corner_adjacent
 import unittest
 import math as maths
 
@@ -67,8 +67,33 @@ class TestMergeLines(unittest.TestCase):
         intersection = get_intersection(line_a, line_b)
         self.assertEqual(intersection, False)
 
+    def test_is_adjacent_true(self):
+        self.assertTrue(is_adjacent((0, 0), (1, 1)))
+        self.assertTrue(is_adjacent((0, 0), (1, 0)))
+        self.assertTrue(is_adjacent((0, 0), (0, 1)))
+
+    def test_is_adjacent_false(self):
+        self.assertFalse(is_adjacent((0, 0), (2, 2)))
+
+    def test_is_corner_adjacent_true(self):
+        self.assertTrue(is_corner_adjacent((0, 0), (1, 1)))
+        self.assertTrue(is_corner_adjacent((0, 0), (-1, -1)))
+
+    def test_is_corner_adjacent_false(self):
+        self.assertFalse(is_corner_adjacent((0, 0), (1, 0)))
+
+    def test_get_magnitude(self):
+        line = Line((0, 0), (5, 5))
+        self.assertEqual(int(get_magnitude(line)), int(maths.sqrt(5**2 + 5**2)))
+
     def test_line_from_radial(self):
         line = line_from_radial((0, 0), 0.785398, maths.sqrt(200))
 
         self.assertEqual(line.a, (0, 0))
         self.assertEqual((round(line.b[0]), round(line.b[1])), (10, 10))
+
+    def test_lies_between_correct(self):
+        self.assertTrue(lies_between((1.5, 1.5), (0, 0), (3, 3)))
+
+    def test_lies_between_false(self):
+        self.assertFalse(lies_between((5, 5), (0, 0), (3, 3)))

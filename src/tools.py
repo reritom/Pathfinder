@@ -73,7 +73,7 @@ def get_intersection(line_a, line_b):
 
     if a_m == b_m:
         # They are parallel
-        print("They are parellel")
+        #print("They are parellel")
         return False
 
     # a_m*x + a_c = b_m*x + b_c
@@ -88,15 +88,15 @@ def get_intersection(line_a, line_b):
 
     if not ((x_intercept > min_x) and (x_intercept < max_x) and (y_intercept > min_y) and (y_intercept < max_y)):
         # Intercept doesn't lie on the segment
-        print("Intercept is out of range")
+        #print("Intercept is out of range")
         return False
 
     return (x_intercept, y_intercept)
 
 def get_magnitude(line: Line):
     dy = abs(line.a[1] - line.b[1])
-    dx = abs(line.a[0] - line.a[0])
-    return maths.sqrt(dy^2 + dx^2)
+    dx = abs(line.a[0] - line.b[0])
+    return maths.sqrt(dy**2 + dx**2)
 
 def merge_lines(lines: List[Line]) -> list:
     def recurse(lines_to_merge):
@@ -183,3 +183,46 @@ class LineSet:
 
     def __len__(self) -> int:
         return len(self.lines)
+
+def centre_of(block: tuple) -> tuple:
+    return (block[0] + 0.5, block[1] + 0.5)
+
+def corners_of(block: tuple) -> list:
+    return [
+        block,
+        (block[0] + 1, block[1]),
+        (block[0], block[1] + 1),
+        (block[0] + 1, block[1] + 1)
+    ]
+
+def is_adjacent(block_a: tuple, block_b: tuple) -> bool:
+    corners_of_a = corners_of(block_a)
+    corners_of_b = corners_of(block_b)
+    corners_touching = 0
+
+    for corner in corners_of_a:
+        if corner in corners_of_b:
+            corners_touching += 1
+
+    return True if corners_touching == 2 else False
+
+def is_corner_adjacent(block_a: tuple, block_b: tuple) -> bool:
+    corners_of_a = corners_of(block_a)
+    corners_of_b = corners_of(block_b)
+    corners_touching = 0
+
+    for corner in corners_of_a:
+        if corner in corners_of_b:
+            corners_touching += 1
+
+    return True if corners_touching == 1 else False
+
+def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
+    mag_a_b = get_magnitude(Line(point_a, point_b))
+    mag_a_o = get_magnitude(Line(point_a, obstacle))
+    mag_b_o = get_magnitude(Line(point_b, obstacle))
+    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.5**2 + 0.5**2)
+    print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
+    print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
+
+    return evaluation

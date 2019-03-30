@@ -221,7 +221,7 @@ def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
     mag_a_b = get_magnitude(Line(point_a, point_b))
     mag_a_o = get_magnitude(Line(point_a, obstacle))
     mag_b_o = get_magnitude(Line(point_b, obstacle))
-    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.5**2 + 0.5**2)
+    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.4**2 + 0.4**2)
     print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
     print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
 

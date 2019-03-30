@@ -61,3 +61,5 @@ class Context:
         print("Cleaning, removing {} blocks".format(len(self.blocks)))
         for block in self.points['blocks']:
             self.points['surroundings'].discard(block)
+
+        return self.points['surroundings']

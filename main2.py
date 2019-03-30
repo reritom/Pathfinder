@@ -7,6 +7,7 @@ import matplotlib
 import imageio
 import os
 
+"""
 maze = Maze.from_file(
     os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -15,8 +16,22 @@ maze = Maze.from_file(
     )
 )
 
+print("Rendering")
+maze.render_to_json(4)
+print("Finished rendering")
+"""
+
+print("Loading maze from json")
+maze = Maze.from_json(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'maze_jsons',
+        'test.json'
+    )
+)
+
+
 print('There are {} blocks total'.format(len(maze.blocks)))
-print('There are {} lines'.format(len(maze.lines)))
 
 
 images = []
@@ -29,8 +44,6 @@ for i in range(0, 20):
     # make an empty data set
     data = np.ones((maze.x + 1, maze.y + 1)[::-1]) * np.nan
 
-
-
     for block in context.blocks:
         data[block[::-1]] = 1
 
@@ -40,12 +53,6 @@ for i in range(0, 20):
     for surrounding in context.surroundings:
         data[surrounding[::-1]] = 0
 
-
-    #for intersect in context.intersects:
-    #    data[intersect[::-1]] = 2
-
-    #for perim in context.perimeter:
-    #    data[perim] = 3
 
     data[pos[::-1]] = 3
 
@@ -67,12 +74,12 @@ for i in range(0, 20):
     # draw the boxes
     ax.imshow(data, interpolation='none', cmap=my_cmap, extent=[0, maze.x, 0, maze.y], zorder=0)
     # turn off the axis labels
-    #ax.axis('off')
+    ax.axis('off')
     ax.invert_yaxis()
 
     fig.canvas.draw()       # draw the canvas, cache the renderer
     image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-    image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
+    image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
     images.append(image)
     print("Finished plot")
 

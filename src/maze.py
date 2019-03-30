@@ -4,6 +4,7 @@ from itertools import combinations
 from .context import Context
 from .tools import LineSet, Line, merge_lines, line_from_radial, get_magnitude, get_intersection, lies_between, centre_of, is_adjacent
 from typing import List
+import os, json
 
 class Maze:
     @classmethod
@@ -24,16 +25,58 @@ class Maze:
                 if value == 'x':
                     instance.blocks.add((x_index, y-y_index))
 
-        instance.render_lines()
+        return instance
+
+    def render_to_json(self, view_range: int):
+        """
+        Process the maze and available positions for any given point for a given range
+        and store it as a json representation
+        """
+        representation = {
+            'dimensions': {
+                'x': self.x,
+                'y': self.y
+            },
+            'range': view_range,
+            'blocks': [block for block in self.blocks],
+            'positions': {}
+        }
+
+        for x in range(self.x):
+            for y in range(self.y):
+                if (x, y) not in self.blocks:
+                    context = self.get_surroundings((x, y), view_range)
+                    representation['positions']["{},{}".format(x, y)] = [surrounding for surrounding in context.surroundings]
+
+        if not 'maze_jsons' in os.listdir('.'):
+            os.mkdir('maze_jsons')
+
+        with open(os.path.join('maze_jsons', 'test.json'), 'w') as f:
+            f.write(json.dumps(representation))
+
+    @classmethod
+    def from_json(cls, filepath: str):
+        with open(filepath, 'r') as f:
+            representation = json.load(f)
+
+        instance = cls(representation['dimensions']['x'], representation['dimensions']['y'])
+        instance.blocks = set([(block[0], block[1]) for block in representation['blocks']])
+
+        for key, value in representation['positions'].items():
+            split = key.split(',')
+            position_tuple = (int(split[0]), int(split[1]))
+            surroundings = set([(surrounding[0], surrounding[1]) for surrounding in value])
+            instance.positions[position_tuple] = surroundings
+
+        instance.pre_rendered = True
         return instance
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.rendered = False
         self.blocks = set()
-        self.lines = list()
-        self.points = set()
+        self.pre_rendered = False
+        self.positions = dict()
 
     def render_lines(self) -> None:
         lines = []
@@ -88,9 +131,6 @@ class Maze:
         self.rendered = True
 
     def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
-        if not self.rendered:
-            raise Exception("Maze needs rendering prior to getting surroundings")
-
         context = Context()
         context.blocks = self.blocks
 
@@ -98,6 +138,10 @@ class Maze:
         centre_x, centre_y = position
 
         if view_range == 0 or position in self.blocks:
+            return context
+
+        if self.pre_rendered:
+            context.surroundings = self.positions[position]
             return context
 
         perimeter = self.bresenhams_circle(centre_x, centre_y, view_range)

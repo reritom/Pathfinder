@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import imageio
 import os
+from src.plotter import Plotter
 
 """
 maze = Maze.from_file(
@@ -33,6 +34,15 @@ maze = Maze.from_json(
 
 print('There are {} blocks total'.format(len(maze.blocks)))
 
+plotter = Plotter(maze.x, maze.y, 20)
+#plotter.set_null('black')
+
+map = {
+    1: (50, 50, 50, 1),
+    2: (100, 100, 100, 1),
+    3: (150, 150, 150, 1),
+    4: (200, 200, 200, 1)
+}
 
 images = []
 
@@ -40,47 +50,27 @@ for i in range(0, 20):
     print("Round {}".format(i))
     pos = (i, i)
     context = maze.get_surroundings(pos, 4)
+    #status_points = bot.get_static_heuristics()
+    #dynamic_points = bot.get_dynamic_heuristics()
 
-    # make an empty data set
-    data = np.ones((maze.x + 1, maze.y + 1)[::-1]) * np.nan
+
+    points = {}
 
     for block in context.blocks:
-        data[block[::-1]] = 1
+        points[block] = 1
 
     for block in maze.blocks:
-        data[block[::-1]] = 2
+        points[block] = 2
 
     for surrounding in context.surroundings:
-        data[surrounding[::-1]] = 0
+        points[surrounding] = 3
 
+    points[pos] = 4
 
-    data[pos[::-1]] = 3
+    plot = plotter.plot(points, map)
+    #plot = plotter.plot_heatmap(points)
 
-    print("Starting plot")
-    # make a figure + axes
-    fig, ax = plt.subplots(1, 1, tight_layout=True)
-    # make color map
-    my_cmap = matplotlib.colors.ListedColormap(['red', 'green', 'blue', 'black', 'yellow'])
-    # set the 'bad' values (nan) to be white and transparent
-    my_cmap.set_bad(color='w', alpha=0)
-    # draw the grid
-    N = max([maze.x, maze.y])
-
-    for x in range(maze.x):
-        for y in range(maze.y):
-            ax.axhline(x, lw=0, color='k', zorder=5)
-            ax.axvline(y, lw=0, color='k', zorder=5)
-
-    # draw the boxes
-    ax.imshow(data, interpolation='none', cmap=my_cmap, extent=[0, maze.x, 0, maze.y], zorder=0)
-    # turn off the axis labels
-    ax.axis('off')
-    ax.invert_yaxis()
-
-    fig.canvas.draw()       # draw the canvas, cache the renderer
-    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-    image = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    images.append(image)
+    images.append(np.asarray(plot))
     print("Finished plot")
 
-imageio.mimsave('./test.gif', images, fps=1)
+imageio.mimsave('./test1.gif', images, fps=1)

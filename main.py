@@ -75,13 +75,18 @@ for i in range(0, 30):
     static_plot = plotter.plot_heatmap(static_points)
     static_plot = plotter.plot(
         {block: 1 for block in maze.blocks},
-        {1: (200, 200, 200, 1)},
+        {1: (250, 250, 250, 1)},
         static_plot
+    )
+    static_plot = plotter.plot_lines(
+        static_plot,
+        [(line.a, line.b) for line in maze.lines],
+        (200, 200, 200, 1)
     )
 
     images_mp.append(np.asarray(map_plot))
     images_sp.append(np.asarray(static_plot))
     print("Finished plot")
 
-imageio.mimsave('./test_mp.gif', images_mp, fps=1)
-imageio.mimsave('./test_sp.gif', images_sp, fps=1)
+imageio.mimsave('./test_mp.gif', images_mp, fps=3)
+imageio.mimsave('./test_sp.gif', images_sp, fps=3)

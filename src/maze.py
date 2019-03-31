@@ -2,7 +2,7 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
-from .tools import lies_between, centre_of, is_adjacent
+from .tools import lies_between, centre_of, is_adjacent, Line, LineSet, merge_lines
 from typing import List
 import os, json
 
@@ -22,6 +22,7 @@ class Maze:
                 if value == 'x':
                     instance.blocks.add((x_index, y-y_index))
 
+        self.render_lines()
         return instance
 
     def render_to_json(self, view_range: int):
@@ -51,6 +52,48 @@ class Maze:
         with open(os.path.join('maze_jsons', 'test.json'), 'w') as f:
             f.write(json.dumps(representation))
 
+    def render_lines(self) -> None:
+        lines = []
+
+        # Add the border lines
+        lines.extend(
+            [
+                Line((0, 0), (self.x+1, 0)),
+                Line((0, 0), (0, self.y+1)),
+                Line((self.x+1, 0), (self.x+1, self.y+1)),
+                Line((0, self.y+1), (self.x+1, self.y+1))
+            ]
+        )
+
+        # Add the lines surrounding blocks
+        for block in self.blocks:
+            x, y = block
+
+            lines.extend(
+                [
+                    Line((x, y), (x, y+1)),
+                    Line((x, y), (x+1, y)),
+                    Line((x+1, y), (x+1, y+1)),
+                    Line((x, y+1), (x+1, y+1))
+                ]
+            )
+
+        # Add the lines to the list
+        line_set = LineSet()
+        line_set.extend(lines)
+
+        print("Len before getting dupe free {}".format(len(lines)))
+
+        dupe_free = line_set.get_duplicate_free()
+
+        print("Block count {} line count {}".format(len(self.blocks), len(dupe_free)))
+        print("Dupes {}".format(len(line_set.duplicates)))
+
+        # Now some lines can be merged
+        lines = merge_lines(dupe_free)
+        self.lines = lines
+        self.rendered = True
+
     @classmethod
     def from_json(cls, filepath: str):
         with open(filepath, 'r') as f:
@@ -74,8 +117,12 @@ class Maze:
         self.blocks = set()
         self.pre_rendered = False
         self.positions = dict()
+        self.rendered = False
 
     def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
+        if not self.rendered:
+            self.render_lines()
+
         context = Context()
         context.blocks = self.blocks
 
@@ -137,8 +184,11 @@ class Maze:
             if block[1] > 0 and block[1] < self.y:
                 self.blocks.add(block)
 
+        self.rendered = False
+
     def remove_block(self, block: tuple) -> None:
         self.blocks.discard(block)
+        self.rendered = False
 
     def bresenhams_circle(self, centre_x: int, centre_y: int, radius: int) -> list:
         def clone_octant(centre_x, centre_y, x, y):

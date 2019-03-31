@@ -117,7 +117,7 @@ def merge_lines(lines: List[Line]) -> list:
 
             for surrounding_line in surrounding_lines:
                 if surrounding_line.delta == line.delta:
-                    print("Merging lines {} and {}".format(surrounding_line, line))
+                    #print("Merging lines {} and {}".format(surrounding_line, line))
                     # These two lines share a point, the point they share will be merged
                     shared_point = line.a if line.a in surrounding_line.points else line.b
                     new_point_a = next(filter(lambda p: p != shared_point, line.points))
@@ -222,7 +222,7 @@ def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
     mag_a_o = get_magnitude(Line(point_a, obstacle))
     mag_b_o = get_magnitude(Line(point_b, obstacle))
     evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.4**2 + 0.4**2)
-    print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
-    print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
+    #print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
+    #print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
 
     return evaluation

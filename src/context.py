@@ -58,7 +58,7 @@ class Context:
 
         # Remove the blocks from the surrounding
         # TODO remove this once raytracing is implemented
-        print("Cleaning, removing {} blocks".format(len(self.blocks)))
+        #print("Cleaning, removing {} blocks".format(len(self.blocks)))
         for block in self.points['blocks']:
             self.points['surroundings'].discard(block)
 

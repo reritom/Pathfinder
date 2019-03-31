@@ -1,13 +1,9 @@
 from src.maze import Maze
 from src.bot import Bot
+from src.plotter import Plotter
 import numpy as np
-import matplotlib
-matplotlib.use('TkAgg') # This is to avoid a python macos issue with rendering the canvas
-import matplotlib.pyplot as plt
-import matplotlib
 import imageio
 import os
-from src.plotter import Plotter
 
 """
 maze = Maze.from_file(
@@ -19,7 +15,7 @@ maze = Maze.from_file(
 )
 
 print("Rendering")
-maze.render_to_json(4)
+maze.render_to_json(6)
 print("Finished rendering")
 """
 
@@ -42,18 +38,19 @@ map = {
     1: (50, 50, 50, 1),
     2: (100, 100, 100, 1),
     3: (150, 150, 150, 1),
-    4: (200, 200, 200, 1)
+    4: (200, 200, 200, 1),
+    5: (50, 100, 150, 1)
 }
 
 images_mp = []
 images_sp = []
 
-bot = Bot((0, 0), (30, 30))
+bot = Bot((0, 0), (40, 40))
 
-for i in range(0, 20):
+for i in range(0, 30):
     print("Round {}".format(i))
     pos = (i, i)
-    context = maze.get_surroundings(pos, 4)
+    context = maze.get_surroundings(pos, 7)
     bot.run_round(context.surroundings)
     static_points = bot.get_static_heuristics()
     #dynamic_points = bot.get_dynamic_heuristics()
@@ -71,6 +68,7 @@ for i in range(0, 20):
         points[surrounding] = 3
 
     points[pos] = 4
+    points[(40, 40)] = 5
 
     map_plot = plotter.plot(points, map)
 

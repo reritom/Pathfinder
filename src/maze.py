@@ -15,9 +15,6 @@ class Maze:
         y = len(lines)
         x = len(lines[0])
 
-        print("Maze x {}".format(x))
-        print("Maze y {}".format(y))
-
         instance = cls(x=x, y=y)
 
         for y_index, line in enumerate(lines):
@@ -116,7 +113,7 @@ class Maze:
 
         # Add the filled surroundings to the context
         context.surroundings = context.surroundings.union(surroundings)
-        print('Surroundings are {}'.format(len(context.surroundings)))
+        #print('Surroundings are {}'.format(len(context.surroundings)))
 
         relevent_blocks = {block for block in self.blocks if block in surroundings}
         shadows = set()

@@ -1,71 +1,89 @@
 from src.maze import Maze
+from src.bot import Bot
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg') # This is to avoid a python macos issue with rendering the canvas
 import matplotlib.pyplot as plt
 import matplotlib
 import imageio
+import os
+from src.plotter import Plotter
 
-N = 150
-maze = Maze(N, N)
-maze.add_block((int(N/2)+5, int(N/2)+5))
+"""
+maze = Maze.from_file(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'mazes',
+        'complex.txt'
+    )
+)
 
-maze.add_block((int(N/2)-5, int(N/2)-5))
-maze.add_block((int(N/2)-5, int(N/2)-6))
-maze.add_block((int(N/2)-5, int(N/2)-7))
+print("Rendering")
+maze.render_to_json(4)
+print("Finished rendering")
+"""
 
-maze.add_block((int(N/2)-5, int(N/2)-5))
-maze.add_block((int(N/2)-6, int(N/2)-5))
-maze.add_block((int(N/2)-7, int(N/2)-5))
+print("Loading maze from json")
+maze = Maze.from_json(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        'maze_jsons',
+        'test.json'
+    )
+)
 
-images = []
 
-for i in range(0, 30):
+print('There are {} blocks total'.format(len(maze.blocks)))
+
+plotter = Plotter(maze.x, maze.y, 20)
+#plotter.set_null('black')
+
+map = {
+    1: (50, 50, 50, 1),
+    2: (100, 100, 100, 1),
+    3: (150, 150, 150, 1),
+    4: (200, 200, 200, 1)
+}
+
+images_mp = []
+images_sp = []
+
+bot = Bot((0, 0), (30, 30))
+
+for i in range(0, 20):
     print("Round {}".format(i))
-    context = maze.get_surroundings((int(N/2) -5 + i, int(N/2)), 15)
+    pos = (i, i)
+    context = maze.get_surroundings(pos, 4)
+    bot.run_round(context.surroundings)
+    static_points = bot.get_static_heuristics()
+    #dynamic_points = bot.get_dynamic_heuristics()
 
-    # make an empty data set
-    data = np.ones((N, N)) * np.nan
 
-    for surrounding in context.surroundings:
-        data[surrounding] = 1
+    points = {}
 
     for block in context.blocks:
-        data[block] = 2
+        points[block] = 1
 
-    #for shadow in context.shadows:
-    #    data[shadow] = 2
+    for block in maze.blocks:
+        points[block] = 2
 
-    #for obscured in context.obscured:
-    #    data[obscured] = 3
+    for surrounding in context.surroundings:
+        points[surrounding] = 3
 
-    #for perim in context.perimeter:
-    #    data[perim] = 3
+    points[pos] = 4
 
-    #for outmost in context.outmost:
-    #    data[outmost] = 3
+    map_plot = plotter.plot(points, map)
 
+    static_plot = plotter.plot_heatmap(static_points)
+    static_plot = plotter.plot(
+        {block: 1 for block in maze.blocks},
+        {1: (200, 200, 200, 1)},
+        static_plot
+    )
 
-    data[(int(N/2) -5 + i, int(N/2))] = 3
+    images_mp.append(np.asarray(map_plot))
+    images_sp.append(np.asarray(static_plot))
+    print("Finished plot")
 
-    # make a figure + axes
-    fig, ax = plt.subplots(1, 1, tight_layout=True)
-    # make color map
-    my_cmap = matplotlib.colors.ListedColormap(['r', 'g', 'b'])
-    # set the 'bad' values (nan) to be white and transparent
-    my_cmap.set_bad(color='w', alpha=0)
-    # draw the grid
-    for x in range(N + 1):
-        ax.axhline(x, lw=0, color='k', zorder=5)
-        ax.axvline(x, lw=0, color='k', zorder=5)
-    # draw the boxes
-    ax.imshow(data, interpolation='none', cmap=my_cmap, extent=[0, N, 0, N], zorder=0)
-    # turn off the axis labels
-    ax.axis('off')
-
-    fig.canvas.draw()       # draw the canvas, cache the renderer
-    image = np.frombuffer(fig.canvas.tostring_rgb(), dtype='uint8')
-    image  = image.reshape(fig.canvas.get_width_height()[::-1] + (3,))
-    images.append(image)
-
-imageio.mimsave('./test1.gif', images, fps=5)
+imageio.mimsave('./test_mp.gif', images_mp, fps=1)
+imageio.mimsave('./test_sp.gif', images_sp, fps=1)

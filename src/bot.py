@@ -5,7 +5,7 @@ class Bot:
     def __init__(self, position: tuple, target: tuple):
         self.position = position
         self.target = target
-        self.
+        self.locations = dict()
         self.previous_positions = []
 
     def run_round(self, surroundings: List[Tuple]) -> tuple:
@@ -15,6 +15,10 @@ class Bot:
                 self.locations[surrounding] = self.calculate_static_heuristic(surrounding)
 
     def calculate_static_heuristic(self, point: tuple):
-        dy = abs(target[1] - point[1])
-        dx = abs(target[0] - point[0])
+        print(self.target)
+        dy = abs(self.target[1] - point[1])
+        dx = abs(self.target[0] - point[0])
         return maths.sqrt(dy**2 + dx**2)
+
+    def get_static_heuristics(self):
+        return self.locations

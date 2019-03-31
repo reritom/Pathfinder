@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFilter
 import numpy as np
 import math as maths
 
@@ -73,8 +73,12 @@ class Plotter:
 
         return plot
 
-    def plot_heatmap(self, points: dict, inverse=True):
-        plot = self.grid.copy()
+    def plot_heatmap(self, points: dict, inverse=True, blur=True):
+        if blur:
+            plot = Image.new('RGBA', (self.x*self.spacing, self.y*self.spacing), (250, 250, 250, 1))
+        else:
+            plot = self.grid.copy()
+
         drawer = ImageDraw.Draw(plot)
         print("Drawing points {}".format(len(points)))
 
@@ -110,8 +114,10 @@ class Plotter:
                 outline=(r, g, b, 1)
             )
 
-        return plot
-
+        if blur:
+            return plot.filter(ImageFilter.GaussianBlur(self.spacing/3))
+        else:
+            return plot
 
 if __name__=='__main__':
     plotter = Plotter(40, 40, 30)

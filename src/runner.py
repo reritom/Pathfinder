@@ -7,10 +7,10 @@ class Runner:
         # For making the maze dynamic
         pass
 
-    def run(self, max=1000, to_gif=True, gif_path='./test.gif', gif_fps=5):
+    def run(self, max_iterations=50, to_gif=True, gif_path='./test.gif', gif_fps=5):
         iterations = 0
 
-        while iterations < max:
+        while iterations < max_iterations or self.bot.position != self.bot.target:
             # See where the bot is placed
             bot_position = self.bot.position
 

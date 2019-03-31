@@ -44,6 +44,7 @@ map = {
 
 images_mp = []
 images_sp = []
+images_dp = []
 
 bot = Bot((0, 0), (40, 40))
 
@@ -53,7 +54,7 @@ for i in range(0, 30):
     context = maze.get_surroundings(pos, 7)
     bot.run_round(context.surroundings)
     static_points = bot.get_static_heuristics()
-    #dynamic_points = bot.get_dynamic_heuristics()
+    dynamic_points = bot.get_dynamic_heuristics()
 
 
     points = {}
@@ -73,20 +74,57 @@ for i in range(0, 30):
     map_plot = plotter.plot(points, map)
 
     static_plot = plotter.plot_heatmap(static_points)
+
     static_plot = plotter.plot(
         {block: 1 for block in maze.blocks},
         {1: (250, 250, 250, 1)},
         static_plot
     )
+
+    static_plot = plotter.plot(
+        {(x, y): 1 for x in range(maze.x) for y in range(maze.y) if (x, y) not in static_points},
+        {1: (250, 250, 250, 1)},
+        static_plot
+    )
+
     static_plot = plotter.plot_lines(
         static_plot,
+        [(line.a, line.b) for line in maze.lines],
+        (200, 200, 200, 1)
+    )
+    """
+    static_plot = plotter.plot_lines(
+        static_plot,
+        [((0, 0), (maze.x, maze.y))],
+        (200, 200, 200, 1)
+    )
+    """
+
+    dynamic_plot = plotter.plot_heatmap(dynamic_points)
+
+    dynamic_plot = plotter.plot(
+        {block: 1 for block in maze.blocks},
+        {1: (250, 250, 250, 1)},
+        dynamic_plot
+    )
+
+    dynamic_plot = plotter.plot(
+        {(x, y): 1 for x in range(maze.x) for y in range(maze.y) if (x, y) not in dynamic_points},
+        {1: (250, 250, 250, 1)},
+        dynamic_plot
+    )
+
+    dynamic_plot = plotter.plot_lines(
+        dynamic_plot,
         [(line.a, line.b) for line in maze.lines],
         (200, 200, 200, 1)
     )
 
     images_mp.append(np.asarray(map_plot))
     images_sp.append(np.asarray(static_plot))
+    images_dp.append(np.asarray(dynamic_plot))
     print("Finished plot")
 
 imageio.mimsave('./test_mp.gif', images_mp, fps=3)
 imageio.mimsave('./test_sp.gif', images_sp, fps=3)
+imageio.mimsave('./test_dp.gif', images_dp, fps=3)

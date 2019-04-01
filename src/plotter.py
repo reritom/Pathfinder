@@ -30,7 +30,7 @@ heatmap = { # TODO convert this to an algorithm
 def get_pixel(value, map):
     valued = round(value / 0.05) * 0.05
     valued = round(valued, 2)
-    print("{} rounded to {}".format(value, valued))
+    #print("{} rounded to {}".format(value, valued))
     return heatmap[valued]
 
 class Plotter:
@@ -74,7 +74,7 @@ class Plotter:
         return plot
 
     def plot_lines(self, plot, lines: list, colour: tuple, inverse=True):
-        print("Drawing {} lines".format(len(lines)))
+        #print("Drawing {} lines".format(len(lines)))
         drawer = ImageDraw.Draw(plot)
 
         for line in lines:
@@ -101,36 +101,37 @@ class Plotter:
 
         return plot
 
-    def plot_heatmap(self, points: dict, inverse=True, blur=True):
+    def plot_heatmap(self, points: dict, inverse=True, blur=True, max_val=None, min_val=None):
         if blur:
             plot = Image.new('RGBA', (self.x*self.spacing, self.y*self.spacing), (250, 250, 250, 1))
         else:
             plot = self.grid.copy()
 
         drawer = ImageDraw.Draw(plot)
-        print("Drawing points {}".format(len(points)))
+        #print("Drawing points {}".format(len(points)))
 
-        # Determine the range
-        maxx, minn = None, None
-        for point, value in points.items():
-            if minn is None:
-                minn = value
-            if maxx is None:
-                maxx = value
+        if not (max_val and min_val):
+            # Determine the range
+            max_val, min_val = None, None
+            for point, value in points.items():
+                if min_val is None:
+                    min_val = value
+                if max_val is None:
+                    max_val = value
 
-            maxx = max([maxx, value])
-            minn = min([minn, value])
+                max_val = max([max_val, value])
+                min_val = min([min_val, value])
 
-        def mapper(value, minn, maxx):
-            mapped = (value - minn)/(maxx - minn)
-            print("{} mapped to {}".format(value, mapped))
+        def mapper(value, min_val, max_val):
+            mapped = (value - min_val)/(max_val - min_val)
+            #print("{} mapped to {}".format(value, mapped))
             return mapped
 
         for point, value in points.items():
             if inverse:
                 point = (point[0], self.y - point[1])
 
-            r, g, b = get_pixel(mapper(value, minn, maxx), map)
+            r, g, b = get_pixel(mapper(value, min_val, max_val), map)
             r, g, b = int(r), int(g), int(b)
 
             drawer.rectangle(

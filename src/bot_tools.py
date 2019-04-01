@@ -1,3 +1,5 @@
+import math as maths
+
 class Location:
     def __init__(self, position: tuple, heuristic):
         self.position = position
@@ -40,3 +42,8 @@ class PriorityQueue(list):
     @property
     def position_list(self):
         return [item.position for item in self[:]]
+
+def distance_between(point_a, point_b):
+    dy = abs(point_a[1] - point_b[1])
+    dx = abs(point_a[0] - point_b[0])
+    return abs(maths.sqrt(dx**2 + dy**2))

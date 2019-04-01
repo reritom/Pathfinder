@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import math as maths
-from .bot_tools import Location, PriorityQueue
+from .bot_tools import Location, PriorityQueue, distance_between
 
 class Bot:
     def __init__(self, position: tuple, target: tuple):
@@ -11,26 +11,38 @@ class Bot:
         self.waypoint = None
         self.priority_queue = PriorityQueue()
         self.processed = []
+        self.blocks = set()
 
-    def run_round(self, surroundings: List[Tuple]) -> tuple:
+    def run_round(self, context) -> tuple:
+        self.blocks = self.blocks.union(context.blocks)
+        surroundings = context.surroundings
+
         # For any new surrounding, add it to the locations with a static heuristic
         for surrounding in surroundings:
             if surrounding not in self.locations:
                 self.locations[surrounding] = self.calculate_static_heuristic(surrounding)
-                self.priority_queue.add(Location(surrounding, self.locations[surrounding]))
+                #self.priority_queue.add(Location(surrounding, self.locations[surrounding]))
+
+        # If we have already set a waypoint, lets continue with that for now
+        #if self.waypoint:
+        #    self.position = self.waypoint.pop(0)
+        #    return self.position
+
+
 
     def move_to(self, position):
         self.previous_positions.append(position)
         self.position = position
 
     def calculate_static_heuristic(self, point: tuple):
-        print(self.target)
-        dy = abs(self.target[1] - point[1])
-        dx = abs(self.target[0] - point[0])
-        return maths.sqrt(dy**2 + dx**2)
+        return distance_between(self.target, point)
 
     def get_static_heuristics(self):
         return self.locations
 
     def get_dynamic_heuristics(self):
-        return {}
+        return {
+            location: value + distance_between(self.position, location)
+            for location, value
+            in self.locations.items()
+        }

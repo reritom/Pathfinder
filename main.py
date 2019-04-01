@@ -48,13 +48,35 @@ images_dp = []
 
 bot = Bot((0, 0), (40, 40))
 
-for i in range(0, 30):
+for i in range(0, 40):
     print("Round {}".format(i))
     pos = (i, i)
     context = maze.get_surroundings(pos, 7)
-    bot.run_round(context.surroundings)
+    bot.run_round(context)
     static_points = bot.get_static_heuristics()
     dynamic_points = bot.get_dynamic_heuristics()
+
+    # Determine the max and min points collectively for the heatmaps to share the same range
+    max_val, min_val = None, None
+    for point, value in static_points.items():
+        if min_val is None:
+            min_val = value
+        if max_val is None:
+            max_val = value
+
+        max_val = max([max_val, value])
+        min_val = min([min_val, value])
+
+    for point, value in dynamic_points.items():
+        if min_val is None:
+            min_val = value
+        if max_val is None:
+            max_val = value
+
+        max_val = max([max_val, value])
+        min_val = min([min_val, value])
+
+    # ------- Basic plot ----
 
 
     points = {}
@@ -73,7 +95,10 @@ for i in range(0, 30):
 
     map_plot = plotter.plot(points, map)
 
-    static_plot = plotter.plot_heatmap(static_points)
+    # -------- Static plot -------
+
+    print("Plotting static heatmap")
+    static_plot = plotter.plot_heatmap(static_points)#, max_val=max_val, min_val=min_val)
 
     static_plot = plotter.plot(
         {block: 1 for block in maze.blocks},
@@ -92,15 +117,10 @@ for i in range(0, 30):
         [(line.a, line.b) for line in maze.lines],
         (200, 200, 200, 1)
     )
-    """
-    static_plot = plotter.plot_lines(
-        static_plot,
-        [((0, 0), (maze.x, maze.y))],
-        (200, 200, 200, 1)
-    )
-    """
 
-    dynamic_plot = plotter.plot_heatmap(dynamic_points)
+    # ------- Dynamic plot -----
+    print("Plotting dynamic heatmap")
+    dynamic_plot = plotter.plot_heatmap(dynamic_points)#, max_val=max_val, min_val=min_val)
 
     dynamic_plot = plotter.plot(
         {block: 1 for block in maze.blocks},

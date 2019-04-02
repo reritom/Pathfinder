@@ -204,6 +204,17 @@ def is_adjacent(block_a: tuple, block_b: tuple) -> bool:
         if corner in corners_of_b:
             corners_touching += 1
 
+    return True if corners_touching else False
+
+def is_face_adjacent(block_a: tuple, block_b: tuple) -> bool:
+    corners_of_a = corners_of(block_a)
+    corners_of_b = corners_of(block_b)
+    corners_touching = 0
+
+    for corner in corners_of_a:
+        if corner in corners_of_b:
+            corners_touching += 1
+
     return True if corners_touching == 2 else False
 
 def is_corner_adjacent(block_a: tuple, block_b: tuple) -> bool:
@@ -221,7 +232,7 @@ def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
     mag_a_b = get_magnitude(Line(point_a, point_b))
     mag_a_o = get_magnitude(Line(point_a, obstacle))
     mag_b_o = get_magnitude(Line(point_b, obstacle))
-    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.4**2 + 0.4**2)
+    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.3**2 + 0.3**2)
     #print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
     #print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
 

@@ -2,7 +2,7 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
-from .tools import lies_between, centre_of, is_adjacent, Line, LineSet, merge_lines
+from .tools import lies_between, centre_of, is_face_adjacent, Line, LineSet, merge_lines
 from typing import List
 import os, json
 
@@ -22,7 +22,7 @@ class Maze:
                 if value == 'x':
                     instance.blocks.add((x_index, y-y_index))
 
-        self.render_lines()
+        instance.render_lines()
         return instance
 
     def render_to_json(self, view_range: int):
@@ -167,7 +167,7 @@ class Maze:
 
         for surrounding in surroundings:
             for block in relevent_blocks:
-                if not is_adjacent(block, position):
+                if not is_face_adjacent(block, position):
                     if lies_between(centre_of(block), centre_of(surrounding), centre_of(position)):
                         shadows.add(surrounding)
 

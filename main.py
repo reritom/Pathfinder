@@ -5,7 +5,7 @@ import numpy as np
 import imageio
 import os
 
-"""
+
 maze = Maze.from_file(
     os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -15,7 +15,7 @@ maze = Maze.from_file(
 )
 
 print("Rendering")
-maze.render_to_json(6)
+maze.render_to_json(5)
 print("Finished rendering")
 """
 
@@ -27,7 +27,7 @@ maze = Maze.from_json(
         'test.json'
     )
 )
-"""
+
 maze = Maze(50,50)
 """
 
@@ -51,11 +51,10 @@ images_dp = []
 
 bot = Bot((0, 0), (40, 40))
 
-for i in range(0, 40):
+for i in range(0, 100):
     print("Round {}".format(i))
-    pos = (i, i)
-    bot.move_to(pos)
-    context = maze.get_surroundings(pos, 15)
+    context = maze.get_surroundings(bot.position, 5)
+    old_pos = bot.position
     bot.run_round(context)
     static_points = bot.get_static_heuristics()
     dynamic_points = bot.get_dynamic_heuristics()
@@ -86,15 +85,16 @@ for i in range(0, 40):
     points = {}
 
     for block in context.blocks:
-        points[block] = 1
-
-    for block in maze.blocks:
         points[block] = 2
 
-    for surrounding in context.surroundings:
-        points[surrounding] = 3
+    for block in maze.blocks:
+        points[block] = 3
 
-    points[pos] = 4
+    for surrounding in context.surroundings:
+        points[surrounding] = 4
+
+    points[old_pos] = 1
+    points[bot.ltaf] = 6
     points[(40, 40)] = 5
 
     map_plot = plotter.plot(points, map)

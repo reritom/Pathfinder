@@ -42,7 +42,21 @@ class Bot:
 
     def get_dynamic_heuristics(self):
         return {
-            location: value + distance_between(self.position, location)
-            for location, value
-            in self.locations.items()
+            location: self.get_dynamic_heuristic(location)
+            for location
+            in self.locations.keys()
         }
+
+    def get_dynamic_heuristic(self, location: tuple):
+        static = self.locations[location]
+        dynamic = static + distance_between(self.position, location)
+        print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
+
+        # Repetition multiplier
+        if location in self.previous_positions:
+            dynamic = dynamic*1.1
+
+        # Block surrounding multiplier
+
+
+        return dynamic

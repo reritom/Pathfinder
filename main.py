@@ -27,7 +27,9 @@ maze = Maze.from_json(
         'test.json'
     )
 )
-
+"""
+maze = Maze(50,50)
+"""
 
 print('There are {} blocks total'.format(len(maze.blocks)))
 
@@ -39,7 +41,8 @@ map = {
     2: (100, 100, 100, 1),
     3: (150, 150, 150, 1),
     4: (200, 200, 200, 1),
-    5: (50, 100, 150, 1)
+    5: (50, 100, 150, 1),
+    6: (0, 0, 0, 1)
 }
 
 images_mp = []
@@ -51,7 +54,8 @@ bot = Bot((0, 0), (40, 40))
 for i in range(0, 40):
     print("Round {}".format(i))
     pos = (i, i)
-    context = maze.get_surroundings(pos, 7)
+    bot.move_to(pos)
+    context = maze.get_surroundings(pos, 15)
     bot.run_round(context)
     static_points = bot.get_static_heuristics()
     dynamic_points = bot.get_dynamic_heuristics()
@@ -122,29 +126,32 @@ for i in range(0, 40):
     print("Plotting dynamic heatmap")
     dynamic_plot = plotter.plot_heatmap(dynamic_points)#, max_val=max_val, min_val=min_val)
 
+    # Plot empty blocks to ease the blur
     dynamic_plot = plotter.plot(
         {block: 1 for block in maze.blocks},
         {1: (250, 250, 250, 1)},
         dynamic_plot
     )
 
+    # Plot each of the non-dynamic points also to ease the blur
     dynamic_plot = plotter.plot(
         {(x, y): 1 for x in range(maze.x) for y in range(maze.y) if (x, y) not in dynamic_points},
         {1: (250, 250, 250, 1)},
         dynamic_plot
     )
 
+    # Plot the outlines of the blocks
     dynamic_plot = plotter.plot_lines(
         dynamic_plot,
         [(line.a, line.b) for line in maze.lines],
         (200, 200, 200, 1)
     )
 
-    images_mp.append(np.asarray(map_plot))
-    images_sp.append(np.asarray(static_plot))
-    images_dp.append(np.asarray(dynamic_plot))
+    images_mp.append(np.asarray(plotter.invert(map_plot)))
+    images_sp.append(np.asarray(plotter.invert(static_plot)))
+    images_dp.append(np.asarray(plotter.invert(dynamic_plot)))
     print("Finished plot")
 
-imageio.mimsave('./test_mp.gif', images_mp, fps=3)
-imageio.mimsave('./test_sp.gif', images_sp, fps=3)
-imageio.mimsave('./test_dp.gif', images_dp, fps=3)
+imageio.mimsave('./test_mp.gif', images_mp, fps=5)
+imageio.mimsave('./test_sp.gif', images_sp, fps=5)
+imageio.mimsave('./test_dp.gif', images_dp, fps=5)

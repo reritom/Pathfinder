@@ -40,6 +40,9 @@ class Plotter:
         self.x = x
         self.y = y
 
+    def invert(self, plot):
+        return plot.transpose(Image.FLIP_TOP_BOTTOM)
+
     def _draw_grid(self, x, y, spacing):
         grid = Image.new('RGBA', (x*spacing, y*spacing), (250, 250, 250, 1))
         drawer = ImageDraw.Draw(grid)
@@ -52,16 +55,13 @@ class Plotter:
 
         return grid
 
-    def plot(self, points, map: dict, plot: Image = None, inverse=True):
+    def plot(self, points, map: dict, plot: Image = None, inverse=False):
         if not plot:
             plot = self.grid.copy()
 
         drawer = ImageDraw.Draw(plot)
 
         for point, value in points.items():
-            if inverse:
-                point = (point[0], self.y - point[1])
-
             drawer.rectangle(
                 [
                     (point[0]*self.spacing, point[1]*self.spacing),
@@ -71,27 +71,21 @@ class Plotter:
                 outline=map[value]
             )
 
-        return plot
+        if inverse:
+            return plot.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            return plot
 
-    def plot_lines(self, plot, lines: list, colour: tuple, inverse=True):
+    def plot_lines(self, plot, lines: list, colour: tuple, inverse=False):
         #print("Drawing {} lines".format(len(lines)))
         drawer = ImageDraw.Draw(plot)
 
         for line in lines:
-            # Invert the y-axis
-
-            if inverse:
-                line = (
-                    (line[0][0], self.y - line[0][1] + 1),
-                    (line[1][0], self.y - line[1][1] + 1)
-                )
-
             # Scale the line
             line = (
                 (line[0][0]*self.spacing, line[0][1]*self.spacing),
                 (line[1][0]*self.spacing, line[1][1]*self.spacing)
             )
-
 
             drawer.line(
                 line,
@@ -99,9 +93,12 @@ class Plotter:
                 width=1
             )
 
-        return plot
+        if inverse:
+            return plot.transpose(Image.FLIP_TOP_BOTTOM)
+        else:
+            return plot
 
-    def plot_heatmap(self, points: dict, inverse=True, blur=True, max_val=None, min_val=None):
+    def plot_heatmap(self, points: dict, inverse=False, blur=True, max_val=None, min_val=None):
         if blur:
             plot = Image.new('RGBA', (self.x*self.spacing, self.y*self.spacing), (250, 250, 250, 1))
         else:
@@ -124,13 +121,9 @@ class Plotter:
 
         def mapper(value, min_val, max_val):
             mapped = (value - min_val)/(max_val - min_val)
-            #print("{} mapped to {}".format(value, mapped))
             return mapped
 
         for point, value in points.items():
-            if inverse:
-                point = (point[0], self.y - point[1])
-
             r, g, b = get_pixel(mapper(value, min_val, max_val), map)
             r, g, b = int(r), int(g), int(b)
 
@@ -144,7 +137,10 @@ class Plotter:
             )
 
         if blur:
-            return plot.filter(ImageFilter.GaussianBlur(self.spacing/3))
+            plot = plot.filter(ImageFilter.GaussianBlur(self.spacing/3))
+
+        if inverse:
+            return plot.transpose(Image.FLIP_TOP_BOTTOM)
         else:
             return plot
 

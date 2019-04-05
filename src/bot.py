@@ -1,7 +1,8 @@
 from typing import List, Tuple
 import math as maths
 from .bot_tools import Location, PriorityQueue, distance_between
-from .tools import is_adjacent
+from .tools import is_adjacent, surroundings_of
+import random
 
 class Bot:
     def __init__(self, position: tuple, target: tuple):
@@ -15,6 +16,9 @@ class Bot:
         self.blocks = set()
 
     def run_round(self, context) -> tuple:
+        if self.position == self.target:
+            return
+
         self.blocks = self.blocks.union(context.blocks)
         surroundings = context.surroundings
 
@@ -31,22 +35,37 @@ class Bot:
             return self.position
 
         # We need to determine the waypoint depending on the available positions
-        location_to_aim_for = self.get_most_valuable_position()
+        dynamic_heuristics = self.get_dynamic_heuristics(only_untravelled=True)
+        location_to_aim_for = self.get_most_valuable_position(dynamic_heuristics)
         self.ltaf = location_to_aim_for
 
         # If the aim is in the immediate area, we will move there directly
         if is_adjacent(location_to_aim_for, self.position):
+            print("location_to_aim_for {} is adjacent to {}".format(location_to_aim_for, self.position))
             self.move_to(location_to_aim_for)
             return self.position
 
+        print("location_to_aim_for {} is NOT adjacent to {}".format(location_to_aim_for, self.position))
+        #self.previous_positions.append(location_to_aim_for)
         # Else we need to find the best route to the place we are aiming for and create a waypoint
+        available_neighbours = {
+            key: dynamic_heuristics[key]
+            for key in surroundings_of(self.position)
+            if key in dynamic_heuristics
+        }
 
         # We do something random
+        best_key, best_value = None, None
+        for key, value in available_neighbours.items():
+            if best_key is None:
+                best_key, best_value = key, value
+            else:
+                if value < best_value:
+                    best_key, best_value = key, value
 
+        self.move_to(best_key)
 
-    def get_most_valuable_position(self):
-        dynamic_locations = self.get_dynamic_heuristics(only_untravelled=True)
-
+    def get_most_valuable_position(self, dynamic_locations):
         lowest_key, lowest_value = None, None
 
         for key, value in dynamic_locations.items():
@@ -92,7 +111,7 @@ class Bot:
     def get_dynamic_heuristic(self, location: tuple):
         static = self.locations[location]
         dynamic = static + distance_between(self.position, location)
-        print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
+        #print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
 
         # Repetition multiplier
         if location in self.previous_positions:

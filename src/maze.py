@@ -10,7 +10,7 @@ class Maze:
     @classmethod
     def from_file(cls, filepath):
         with open(filepath, 'r') as f:
-            lines = f.readlines()
+            lines = f.read().splitlines()
 
         y = len(lines)
         x = len(lines[0])
@@ -19,10 +19,22 @@ class Maze:
 
         for y_index, line in enumerate(lines):
             for x_index, value in enumerate(line):
+                if not len(line) == x:
+                    raise Exception("Line {} is of len {} while line {} is len {}".format(y_index, len(line), x_index, x))
                 if value == 'x':
-                    instance.blocks.add((x_index, y-y_index))
+                    instance.blocks.add((x_index, y - y_index))
 
         instance.render_lines()
+        """
+        for y in range(instance.y):
+            for x in range(instance.x):
+                if (x, y) in instance.blocks:
+                    print('x', end='')
+                else:
+                    print('-'.format(x), end='')
+            print('\n')
+        """
+
         return instance
 
     def render_to_json(self, view_range: int):
@@ -58,10 +70,10 @@ class Maze:
         # Add the border lines
         lines.extend(
             [
-                Line((0, 0), (self.x+1, 0)),
-                Line((0, 0), (0, self.y+1)),
-                Line((self.x+1, 0), (self.x+1, self.y+1)),
-                Line((0, self.y+1), (self.x+1, self.y+1))
+                Line((0, 0), (self.x, 0)),
+                Line((0, 0), (0, self.y)),
+                Line((self.x, 0), (self.x, self.y)),
+                Line((0, self.y), (self.x, self.y))
             ]
         )
 
@@ -82,12 +94,12 @@ class Maze:
         line_set = LineSet()
         line_set.extend(lines)
 
-        print("Len before getting dupe free {}".format(len(lines)))
+        #print("Len before getting dupe free {}".format(len(lines)))
 
         dupe_free = line_set.get_duplicate_free()
 
-        print("Block count {} line count {}".format(len(self.blocks), len(dupe_free)))
-        print("Dupes {}".format(len(line_set.duplicates)))
+        #print("Block count {} line count {}".format(len(self.blocks), len(dupe_free)))
+        #print("Dupes {}".format(len(line_set.duplicates)))
 
         # Now some lines can be merged
         lines = merge_lines(dupe_free)
@@ -167,9 +179,9 @@ class Maze:
 
         for surrounding in surroundings:
             for block in relevent_blocks:
-                if not is_face_adjacent(block, position):
-                    if lies_between(centre_of(block), centre_of(surrounding), centre_of(position)):
-                        shadows.add(surrounding)
+                #if not is_face_adjacent(block, position):
+                if lies_between(block, centre_of(surrounding), centre_of(position)):
+                    shadows.add(surrounding)
 
         for shadow in shadows:
             context.surroundings.discard(shadow)

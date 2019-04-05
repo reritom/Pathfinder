@@ -93,7 +93,13 @@ class TestMergeLines(unittest.TestCase):
         self.assertEqual((round(line.b[0]), round(line.b[1])), (10, 10))
 
     def test_lies_between_correct(self):
-        self.assertTrue(lies_between((1.5, 1.5), (0, 0), (3, 3)))
+        self.assertTrue(lies_between((1, 1), (0, 0), (3, 3)))
+        print("RFHEY")
+        self.assertTrue(lies_between((1, 2), (1, 1), (1, 3)))
+        print("YEHFR")
+        self.assertTrue(lies_between((1, 2), (1, 1), (2, 3)))
 
     def test_lies_between_false(self):
-        self.assertFalse(lies_between((5, 5), (0, 0), (3, 3)))
+        print("Testing test_lies_between_false")
+        self.assertFalse(lies_between((10, 10), (0, 0), (3, 3)))
+        print("End of testing test_lies_between_false")

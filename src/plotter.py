@@ -62,10 +62,11 @@ class Plotter:
         drawer = ImageDraw.Draw(plot)
 
         for point, value in points.items():
+            px, py = point
             drawer.rectangle(
                 [
-                    (point[0]*self.spacing, point[1]*self.spacing),
-                    ((point[0] + 1)*self.spacing, (point[1] + 1)*self.spacing)
+                    (px*self.spacing, py*self.spacing),
+                    ((px + 1)*self.spacing - 1, (py + 1)*self.spacing - 1)
                 ],
                 fill=map[value],
                 outline=map[value]
@@ -124,13 +125,14 @@ class Plotter:
             return mapped
 
         for point, value in points.items():
+            px, py = point
             r, g, b = get_pixel(mapper(value, min_val, max_val), map)
             r, g, b = int(r), int(g), int(b)
 
             drawer.rectangle(
                 [
-                    (point[0]*self.spacing, point[1]*self.spacing),
-                    ((point[0] + 1)*self.spacing, (point[1] + 1)*self.spacing)
+                    (px*self.spacing, py*self.spacing),
+                    ((px + 1)*self.spacing - 1, (py + 1)*self.spacing - 1)
                 ],
                 fill=(r, g, b, 1),
                 outline=(r, g, b, 1)

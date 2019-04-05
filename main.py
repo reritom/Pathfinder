@@ -14,9 +14,9 @@ maze = Maze.from_file(
     )
 )
 
-print("Rendering")
-maze.render_to_json(5)
-print("Finished rendering")
+#print("Rendering")
+#maze.render_to_json(5)
+#print("Finished rendering")
 """
 
 print("Loading maze from json")
@@ -59,28 +59,7 @@ for i in range(0, 100):
     static_points = bot.get_static_heuristics()
     dynamic_points = bot.get_dynamic_heuristics()
 
-    # Determine the max and min points collectively for the heatmaps to share the same range
-    max_val, min_val = None, None
-    for point, value in static_points.items():
-        if min_val is None:
-            min_val = value
-        if max_val is None:
-            max_val = value
-
-        max_val = max([max_val, value])
-        min_val = min([min_val, value])
-
-    for point, value in dynamic_points.items():
-        if min_val is None:
-            min_val = value
-        if max_val is None:
-            max_val = value
-
-        max_val = max([max_val, value])
-        min_val = min([min_val, value])
-
     # ------- Basic plot ----
-
 
     points = {}
 
@@ -93,8 +72,9 @@ for i in range(0, 100):
     for surrounding in context.surroundings:
         points[surrounding] = 4
 
-    points[old_pos] = 1
-    points[bot.ltaf] = 6
+    points[old_pos] = 6
+    points[bot.ltaf] = 1
+    points[bot.position] = 2
     points[(40, 40)] = 5
 
     map_plot = plotter.plot(points, map)

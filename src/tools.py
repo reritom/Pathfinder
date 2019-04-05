@@ -73,25 +73,34 @@ def get_intersection(line_a, line_b):
 
     if a_m == b_m:
         # They are parallel
-        #print("They are parellel")
-        return False
+        print("They are parellel")
+        return False # todo fix this
 
     # a_m*x + a_c = b_m*x + b_c
     x_intercept = (b_c - a_c) / (a_m - b_m)
     y_intercept = a_m*x_intercept + a_c
 
-    # Check if the intercepts are within the line_b segment
-    max_x = max(line_b.a[0], line_b.b[0])
-    min_x = min(line_b.a[0], line_b.b[0])
-    max_y = max(line_b.a[1], line_b.b[1])
-    min_y = min(line_b.a[1], line_b.b[1])
+    # Check if the intercepts are within the line_a segment
+    max_x = max(line_a.a[0], line_a.b[0])
+    min_x = min(line_a.a[0], line_a.b[0])
+    max_y = max(line_a.a[1], line_a.b[1])
+    min_y = min(line_a.a[1], line_a.b[1])
 
-    if not ((x_intercept > min_x) and (x_intercept < max_x) and (y_intercept > min_y) and (y_intercept < max_y)):
-        # Intercept doesn't lie on the segment
-        #print("Intercept is out of range")
-        return False
+    if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
 
-    return (x_intercept, y_intercept)
+        # Check if the intercepts are within the line_b segment
+        max_x = max(line_b.a[0], line_b.b[0])
+        min_x = min(line_b.a[0], line_b.b[0])
+        max_y = max(line_b.a[1], line_b.b[1])
+        min_y = min(line_b.a[1], line_b.b[1])
+
+        if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
+            print("intercept ok")
+            return (x_intercept, y_intercept)
+
+    # Intercept doesn't lie on the segment
+    print("{} Intercept is out of range".format((x_intercept, y_intercept)))
+    return False
 
 def get_magnitude(line: Line):
     dy = abs(line.a[1] - line.b[1])
@@ -195,16 +204,21 @@ def corners_of(block: tuple) -> list:
         (block[0] + 1, block[1] + 1)
     ]
 
+def edges_of(block: tuple) -> List[Line]:
+    return [
+        Line((block[0], block[1]), (block[0] + 1, block[1])),
+        Line((block[0], block[1]), (block[0], block[1] + 1)),
+        Line((block[0] + 1, block[1] + 1), (block[0], block[1] + 1)),
+        Line((block[0] + 1, block[1] + 1), (block[0] + 1, block[1]))
+    ]
+
 def is_adjacent(block_a: tuple, block_b: tuple) -> bool:
     corners_of_a = corners_of(block_a)
     corners_of_b = corners_of(block_b)
-    corners_touching = 0
 
     for corner in corners_of_a:
         if corner in corners_of_b:
-            corners_touching += 1
-
-    return True if corners_touching else False
+            return True
 
 def is_face_adjacent(block_a: tuple, block_b: tuple) -> bool:
     corners_of_a = corners_of(block_a)
@@ -229,11 +243,12 @@ def is_corner_adjacent(block_a: tuple, block_b: tuple) -> bool:
     return True if corners_touching == 1 else False
 
 def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
-    mag_a_b = get_magnitude(Line(point_a, point_b))
-    mag_a_o = get_magnitude(Line(point_a, obstacle))
-    mag_b_o = get_magnitude(Line(point_b, obstacle))
-    evaluation = abs(mag_a_b - (mag_a_o + mag_b_o)) <= maths.sqrt(0.3**2 + 0.3**2)
-    #print("{} lies between {} and {}".format(obstacle, point_a, point_b, evaluation))
-    #print("{} = {} + {} = {}".format(mag_a_b, mag_a_o, mag_b_o, evaluation))
+    a_b_line = Line(point_a, point_b)
+    obstacle_lines = edges_of(obstacle)
 
-    return evaluation
+    for obstacle_line in obstacle_lines:
+        print("Finding intercept between {} and {}".format(a_b_line, obstacle_line))
+        intersect = get_intersection(a_b_line, obstacle_line)
+        print("Intersection at {}".format(intersect))
+        if intersect:
+            return True

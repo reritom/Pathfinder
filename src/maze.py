@@ -2,9 +2,9 @@ import numpy as np
 import math as maths
 from itertools import combinations
 from .context import Context
-from .tools import lies_between, centre_of, is_face_adjacent, Line, LineSet, merge_lines
+from .tools import lies_between, centre_of, is_face_adjacent, Line, LineSet, merge_lines, get_artificial_blocks, surroundings_of
 from typing import List
-import os, json
+import os, json, copy
 
 class Maze:
     @classmethod
@@ -136,7 +136,6 @@ class Maze:
             self.render_lines()
 
         context = Context()
-        context.blocks = self.blocks
 
         # For a given position, return the surrounding positions
         centre_x, centre_y = position
@@ -175,6 +174,18 @@ class Maze:
         #print('Surroundings are {}'.format(len(context.surroundings)))
 
         relevent_blocks = {block for block in self.blocks if block in surroundings}
+        context.blocks = relevent_blocks
+
+        # In cases of two adjacent faces being blocked, the corner block between them should be considered as a block too
+        relevent_blocks = copy.deepcopy(relevent_blocks)
+        relevent_blocks = relevent_blocks.union(
+            get_artificial_blocks(
+                position,
+                [surrounding for surrounding in surroundings_of(position) if surrounding in relevent_blocks]
+            )
+        )
+
+
         shadows = set()
 
         for surrounding in surroundings:

@@ -61,7 +61,7 @@ def get_intersection(line_a, line_b):
     Determine the intersection between line_a and line_b, but the intersection is only
     counted if it is between the range of the two line_b points
     """
-    print("Getting intersection of {} {}".format(line_a, line_b))
+    #print("Getting intersection of {} {}".format(line_a, line_b))
     # y = mx + c
     a_m = line_a.dydx
     a_c = line_a.a[1] - a_m * line_a.a[0]
@@ -73,8 +73,8 @@ def get_intersection(line_a, line_b):
 
     if a_m == b_m:
         # They are parallel
-        print("They are parellel")
-        return False # todo fix this
+        #print("They are parellel")
+        return "PARALLEL" # todo fix this
 
     # a_m*x + a_c = b_m*x + b_c
     x_intercept = (b_c - a_c) / (a_m - b_m)
@@ -95,11 +95,11 @@ def get_intersection(line_a, line_b):
         min_y = min(line_b.a[1], line_b.b[1])
 
         if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
-            print("intercept ok")
+            #print("intercept ok")
             return (x_intercept, y_intercept)
 
     # Intercept doesn't lie on the segment
-    print("{} Intercept is out of range".format((x_intercept, y_intercept)))
+    #print("{} Intercept is out of range".format((x_intercept, y_intercept)))
     return False
 
 def get_magnitude(line: Line):
@@ -247,8 +247,57 @@ def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
     obstacle_lines = edges_of(obstacle)
 
     for obstacle_line in obstacle_lines:
-        print("Finding intercept between {} and {}".format(a_b_line, obstacle_line))
+        #print("Finding intercept between {} and {}".format(a_b_line, obstacle_line))
         intersect = get_intersection(a_b_line, obstacle_line)
-        print("Intersection at {}".format(intersect))
-        if intersect:
+        #print("Intersection at {}".format(intersect))
+        if intersect == 'PARALLEL':
+            mag_a_b = get_magnitude(a_b_line)
+            mag_a_o = get_magnitude(Line(point_a, centre_of(obstacle)))
+            mag_b_o = get_magnitude(Line(point_b, centre_of(obstacle)))
+            evaluation = abs(mag_a_b - (mag_a_o + mag_b_o))
+            #print("Evaluation is {}".format(evaluation))
+            evaluation = evaluation <= 0.1
+            if evaluation:
+                #print("Parellel block")
+                return True
+
+        elif intersect:
             return True
+
+def get_artificial_blocks(point, surrounding_blocks):
+    x, y = point
+
+    face_pairs = [
+        [
+            Line((x, y), (x+1, y)),
+            Line((x, y), (x, y+1)),
+            (x-1, y-1)
+        ],
+        [
+            Line((x+1, y), (x, y)),
+            Line((x+1, y), (x, y+1)),
+            (x+1, y-1)
+        ],
+        [
+            Line((x, y+1), (x+1, y)),
+            Line((x, y+1), (x, y)),
+            (x-1, y+1)
+        ],
+        [
+            Line((x+1, y+1), (x+1, y)),
+            Line((x+1, y+1), (x, y+1)),
+            (x+1, y+1)
+        ]
+    ]
+
+    edges = []
+    for surrounding_block in surrounding_blocks:
+        edges.extend(edges_of(surrounding_block))
+
+    artificial_blocks = []
+    for face_pair in face_pairs:
+        if face_pair[0] in edges and face_pair[1] in edges:
+            artificial_blocks.append(face_pair[2])
+
+    print("There are {} artifical blocks".format(len(artificial_blocks)))
+    return artificial_blocks

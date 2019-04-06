@@ -25,7 +25,10 @@ class Bot:
         # For any new surrounding, add it to the locations with a static heuristic
         for surrounding in surroundings:
             if surrounding not in self.locations:
-                self.locations[surrounding] = self.calculate_static_heuristic(surrounding)
+                self.locations[surrounding] = {
+                    'static': self.calculate_static_heuristic(surrounding),
+                    'steps': 0
+                }
                 #self.priority_queue.add(Location(surrounding, self.locations[surrounding]))
 
         # If we have already set a waypoint, lets continue with that for now
@@ -35,7 +38,7 @@ class Bot:
             return self.position
 
         # We need to determine the waypoint depending on the available positions
-        dynamic_heuristics = self.get_dynamic_heuristics(only_untravelled=True)
+        dynamic_heuristics = self.get_dynamic_heuristics()#(only_untravelled=True)
         location_to_aim_for = self.get_most_valuable_position(dynamic_heuristics)
         self.ltaf = location_to_aim_for
 
@@ -81,6 +84,7 @@ class Bot:
     def move_to(self, position):
         self.previous_positions.append(position)
         self.position = position
+        self.locations[position]['steps'] += 1
 
     def calculate_static_heuristic(self, point: tuple):
         return distance_between(self.target, point)
@@ -88,12 +92,12 @@ class Bot:
     def get_static_heuristics(self, only_untravelled=False):
         if only_untravelled:
             return {
-                location: value
+                location: value['static']
                 for location, value in self.location.items()
                 if location not in self.previous_positions
             }
 
-        return self.locations
+        return {location: value['static'] for location, value in self.locations.items()}
 
     def get_dynamic_heuristics(self, only_untravelled=False):
         if only_untravelled:
@@ -109,13 +113,12 @@ class Bot:
         }
 
     def get_dynamic_heuristic(self, location: tuple):
-        static = self.locations[location]
+        static = self.locations[location]['static']
         dynamic = static + distance_between(self.position, location)
         #print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
 
         # Repetition multiplier
-        if location in self.previous_positions:
-            dynamic = dynamic*1.1
+        dynamic = dynamic*1.1**self.locations[location]['steps']
 
         # Block surrounding multiplier
 

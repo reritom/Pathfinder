@@ -1,4 +1,14 @@
-from .tools import Line, merge_lines, get_intersection, line_from_radial, lies_between, get_magnitude, is_adjacent, is_corner_adjacent
+from .tools import (
+    Line,
+    merge_lines,
+    get_intersection,
+    line_from_radial,
+    lies_between,
+    get_magnitude,
+    is_adjacent,
+    is_corner_adjacent,
+    get_artificial_blocks
+)
 import unittest
 import math as maths
 
@@ -51,7 +61,7 @@ class TestMergeLines(unittest.TestCase):
         )
 
         intersection = get_intersection(line_a, line_b)
-        self.assertEqual(intersection, False)
+        self.assertEqual(intersection, "PARALLEL")
 
     def test_get_intersection_out_of_range(self):
         line_a = Line(
@@ -94,12 +104,19 @@ class TestMergeLines(unittest.TestCase):
 
     def test_lies_between_correct(self):
         self.assertTrue(lies_between((1, 1), (0, 0), (3, 3)))
-        print("RFHEY")
         self.assertTrue(lies_between((1, 2), (1, 1), (1, 3)))
-        print("YEHFR")
         self.assertTrue(lies_between((1, 2), (1, 1), (2, 3)))
 
     def test_lies_between_false(self):
         print("Testing test_lies_between_false")
         self.assertFalse(lies_between((10, 10), (0, 0), (3, 3)))
         print("End of testing test_lies_between_false")
+
+    def test_get_artificial_blocks(self):
+        artificial_blocks = get_artificial_blocks(
+            (0, 0),
+            [(1, 0), (0, 1)]
+        )
+
+        expected_artificial_block = (1, 1)
+        self.assertIn(expected_artificial_block, artificial_blocks)

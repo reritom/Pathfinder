@@ -29,7 +29,6 @@ class Bot:
                     'static': self.calculate_static_heuristic(surrounding),
                     'steps': 0
                 }
-                #self.priority_queue.add(Location(surrounding, self.locations[surrounding]))
 
         # If we have already set a waypoint, lets continue with that for now
         if self.waypoint:

@@ -29,10 +29,9 @@ maze = Maze.from_json(
 )
 
 maze = Maze(50,50)
-"""
 
 print('There are {} blocks total'.format(len(maze.blocks)))
-
+"""
 plotter = Plotter(maze.x, maze.y, 20)
 #plotter.set_null('black')
 

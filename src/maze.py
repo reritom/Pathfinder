@@ -17,12 +17,12 @@ class Maze:
 
         instance = cls(x=x, y=y)
 
-        for y_index, line in enumerate(lines):
+        for y_index, line in enumerate(reversed(lines)):
             for x_index, value in enumerate(line):
                 if not len(line) == x:
                     raise Exception("Line {} is of len {} while line {} is len {}".format(y_index, len(line), x_index, x))
                 if value == 'x':
-                    instance.blocks.add((x_index, y - y_index))
+                    instance.blocks.add((x_index, y_index))
 
         instance.render_lines()
         """
@@ -32,7 +32,7 @@ class Maze:
                     print('x', end='')
                 else:
                     print('-'.format(x), end='')
-            print('\n')
+            print('')
         """
 
         return instance
@@ -184,7 +184,6 @@ class Maze:
                 [surrounding for surrounding in surroundings_of(position) if surrounding in relevent_blocks]
             )
         )
-
 
         shadows = set()
 

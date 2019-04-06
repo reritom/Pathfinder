@@ -299,5 +299,4 @@ def get_artificial_blocks(point, surrounding_blocks):
         if face_pair[0] in edges and face_pair[1] in edges:
             artificial_blocks.append(face_pair[2])
 
-    print("There are {} artifical blocks".format(len(artificial_blocks)))
     return artificial_blocks

@@ -3,7 +3,7 @@ from src.bot import Bot
 from src.plotter import Plotter
 import numpy as np
 import imageio
-import os
+import os, copy
 
 
 maze = Maze.from_file(
@@ -48,9 +48,12 @@ images_mp = []
 images_sp = []
 images_dp = []
 
-bot = Bot((0, 0), (40, 40))
+bot = Bot(
+    position=(0, 0),
+    destination=(40, 40)
+)
 
-for i in range(0, 50):
+for i in range(0, 300):
     print("Round {}".format(i))
     context = maze.get_surroundings(bot.position, 5)
     old_pos = bot.position
@@ -79,7 +82,7 @@ for i in range(0, 50):
     map_plot = plotter.plot(points, map)
 
     # -------- Static plot -------
-
+    """
     print("Plotting static heatmap")
     static_plot = plotter.plot_heatmap(static_points)#, max_val=max_val, min_val=min_val)
 
@@ -100,9 +103,9 @@ for i in range(0, 50):
         [(line.a, line.b) for line in maze.lines],
         (200, 200, 200, 1)
     )
+    """
 
     # ------- Dynamic plot -----
-    print("Plotting dynamic heatmap")
     dynamic_plot = plotter.plot_heatmap(dynamic_points)#, max_val=max_val, min_val=min_val)
 
     # Plot empty blocks to ease the blur
@@ -127,10 +130,9 @@ for i in range(0, 50):
     )
 
     images_mp.append(np.asarray(plotter.invert(map_plot)))
-    images_sp.append(np.asarray(plotter.invert(static_plot)))
+    #images_sp.append(np.asarray(plotter.invert(static_plot)))
     images_dp.append(np.asarray(plotter.invert(dynamic_plot)))
-    print("Finished plot")
 
-imageio.mimsave('./test_mp.gif', images_mp, fps=5)
-imageio.mimsave('./test_sp.gif', images_sp, fps=5)
-imageio.mimsave('./test_dp.gif', images_dp, fps=5)
+imageio.mimsave('./test_mp.gif', images_mp, fps=10)
+#imageio.mimsave('./test_sp.gif', images_sp, fps=10)
+imageio.mimsave('./test_dp.gif', images_dp, fps=10)

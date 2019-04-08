@@ -33,8 +33,6 @@ class TestMergeLines(unittest.TestCase):
         self.assertTrue(Line((2, 1), (2, 0)) in merged)
         self.assertTrue(Line((2, 0), (0, 0)) in merged)
 
-        print("Test merge lines OK")
-
     def test_get_intersection(self):
         line_a = Line(
             (0, 0),
@@ -106,11 +104,17 @@ class TestMergeLines(unittest.TestCase):
         self.assertTrue(lies_between((1, 1), (0, 0), (3, 3)))
         self.assertTrue(lies_between((1, 2), (1, 1), (1, 3)))
         self.assertTrue(lies_between((1, 2), (1, 1), (2, 3)))
-
+        self.assertTrue(lies_between((1, 2), (1, 1), (2, 3)))
+        self.assertTrue(lies_between((3, 0), (1, 0), (4, 0)))
+        self.assertTrue(lies_between((3, 0), (1, 1), (4, 0)))
+        print("RFHEY")
+        self.assertTrue(lies_between((4, 0), (0, 1), (5, 0)))
+        print("END")
+    """
     def test_lies_between_false(self):
-        print("Testing test_lies_between_false")
         self.assertFalse(lies_between((10, 10), (0, 0), (3, 3)))
-        print("End of testing test_lies_between_false")
+        self.assertFalse(lies_between((1, 1), (0, 0), (2, 0)))
+        self.assertFalse(lies_between((2, 1), (0, 0), (2, 0)))
 
     def test_get_artificial_blocks(self):
         artificial_blocks = get_artificial_blocks(
@@ -120,3 +124,4 @@ class TestMergeLines(unittest.TestCase):
 
         expected_artificial_block = (1, 1)
         self.assertIn(expected_artificial_block, artificial_blocks)
+    """

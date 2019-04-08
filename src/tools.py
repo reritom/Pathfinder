@@ -33,6 +33,10 @@ class Line:
             return 0
 
     @property
+    def is_vertical(self):
+        return self.a[0] == self.b[0]
+
+    @property
     def points(self):
         return [self.a, self.b]
 
@@ -61,24 +65,36 @@ def get_intersection(line_a, line_b):
     Determine the intersection between line_a and line_b, but the intersection is only
     counted if it is between the range of the two line_b points
     """
-    #print("Getting intersection of {} {}".format(line_a, line_b))
+    if line_a.is_vertical and line_b.is_vertical:
+        return "PARALLEL"
+
     # y = mx + c
     a_m = line_a.dydx
     a_c = line_a.a[1] - a_m * line_a.a[0]
-    #print("line a {} = {}*{} + {}".format(line_a.a[1], a_m, line_a.a[0], a_c))
 
     b_m = line_b.dydx
     b_c = line_b.a[1] - b_m * line_b.a[0]
-    #print("line a {} = {}*{} + {}".format(line_a.a[1], a_m, line_a.a[0], a_c))
 
     if a_m == b_m:
-        # They are parallel
-        #print("They are parellel")
-        return "PARALLEL" # todo fix this
+        if line_a.is_vertical or line_b.is_vertical:
+            pass
+        else:
+            # They are horizontally parallel
+            return "PARALLEL"
 
-    # a_m*x + a_c = b_m*x + b_c
-    x_intercept = (b_c - a_c) / (a_m - b_m)
-    y_intercept = a_m*x_intercept + a_c
+    # If either line is vertical, we calculate the intercept differently
+    if line_a.is_vertical:
+        x_intercept = line_a.a[0]
+        y_intercept = b_m*x_intercept + b_c
+    elif line_b.is_vertical:
+        x_intercept = line_b.a[0]
+        y_intercept = a_m*x_intercept + a_c
+    else:
+        # a_m*x + a_c = b_m*x + b_c
+        x_intercept = (b_c - a_c) / (a_m - b_m)
+        y_intercept = a_m*x_intercept + a_c
+
+    print("Intercept before range check {}".format((x_intercept, y_intercept)))
 
     # Check if the intercepts are within the line_a segment
     max_x = max(line_a.a[0], line_a.b[0])
@@ -87,7 +103,7 @@ def get_intersection(line_a, line_b):
     min_y = min(line_a.a[1], line_a.b[1])
 
     if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
-
+        print("Intercept in line_a range")
         # Check if the intercepts are within the line_b segment
         max_x = max(line_b.a[0], line_b.b[0])
         min_x = min(line_b.a[0], line_b.b[0])
@@ -95,7 +111,7 @@ def get_intersection(line_a, line_b):
         min_y = min(line_b.a[1], line_b.b[1])
 
         if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
-            #print("intercept ok")
+            print("intercept ok")
             return (x_intercept, y_intercept)
 
     # Intercept doesn't lie on the segment
@@ -243,26 +259,27 @@ def is_corner_adjacent(block_a: tuple, block_b: tuple) -> bool:
     return True if corners_touching == 1 else False
 
 def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
-    a_b_line = Line(point_a, point_b)
+    a_b_line = Line(centre_of(point_a), centre_of(point_b))
     obstacle_lines = edges_of(obstacle)
 
     for obstacle_line in obstacle_lines:
-        #print("Finding intercept between {} and {}".format(a_b_line, obstacle_line))
         intersect = get_intersection(a_b_line, obstacle_line)
-        #print("Intersection at {}".format(intersect))
         if intersect == 'PARALLEL':
             mag_a_b = get_magnitude(a_b_line)
-            mag_a_o = get_magnitude(Line(point_a, centre_of(obstacle)))
-            mag_b_o = get_magnitude(Line(point_b, centre_of(obstacle)))
+            mag_a_o = get_magnitude(Line(centre_of(point_a), centre_of(obstacle)))
+            mag_b_o = get_magnitude(Line(centre_of(point_b), centre_of(obstacle)))
             evaluation = abs(mag_a_b - (mag_a_o + mag_b_o))
-            #print("Evaluation is {}".format(evaluation))
-            evaluation = evaluation <= 0.1
-            if evaluation:
-                #print("Parellel block")
+            print("Is parallel with eval of {}".format(evaluation))
+            if evaluation == 0:
                 return True
 
         elif intersect:
+            print("Intersect at i{} between lines o{} ab{}".format(intersect, obstacle_line, a_b_line))
             return True
+
+        else:
+            print("No nuttin a{} o{} b{} line{}".format(point_a, obstacle, point_b, obstacle_line))
+            print(intersect)
 
 def get_artificial_blocks(point, surrounding_blocks):
     x, y = point

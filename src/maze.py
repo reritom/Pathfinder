@@ -52,6 +52,14 @@ class Maze:
             'positions': {}
         }
 
+        if not self.rendered:
+            self.render_lines()
+
+        representation['lines'] = [
+            {'a': line.a, 'b': line.b}
+            for line in self.lines
+        ]
+
         for x in range(self.x):
             for y in range(self.y):
                 if (x, y) not in self.blocks:
@@ -120,6 +128,10 @@ class Maze:
             surroundings = set([(surrounding[0], surrounding[1]) for surrounding in value])
             instance.positions[position_tuple] = surroundings
 
+        for line_dict in representation['lines']:
+            instance.lines.append[Line(line_dict['a'], line_dict['b'])]
+            instance.rendered = True
+
         instance.pre_rendered = True
         return instance
 
@@ -130,6 +142,7 @@ class Maze:
         self.pre_rendered = False
         self.positions = dict()
         self.rendered = False
+        self.lines = []
 
     def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
         if not self.rendered:
@@ -189,8 +202,7 @@ class Maze:
 
         for surrounding in surroundings:
             for block in relevent_blocks:
-                #if not is_face_adjacent(block, position):
-                if lies_between(block, centre_of(surrounding), centre_of(position)):
+                if lies_between(block, surrounding, position):
                     shadows.add(surrounding)
 
         for shadow in shadows:

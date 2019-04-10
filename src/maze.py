@@ -144,6 +144,20 @@ class Maze:
         self.rendered = False
         self.lines = []
 
+    def get_full_context(self):
+        context = Context()
+        context.blocks = self.blocks
+        context.surroundings = {
+            (x, y)
+            for x in range(self.x)
+            for y in range(self.y)
+            if (x, y) not in self.blocks
+        }
+
+        # Strip any that are outside of the grid
+        context.clean(self.x, self.y)
+        return context
+
     def get_surroundings(self, position: tuple, view_range: int = 1) -> Context:
         if not self.rendered:
             self.render_lines()

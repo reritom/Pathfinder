@@ -53,9 +53,16 @@ bot = Bot(
     destination=(40, 40)
 )
 
-for i in range(0, 300):
+for i in range(0, 400):
+    if bot.position == bot.destination:
+        break
+
     print("Round {}".format(i))
-    context = maze.get_surroundings(bot.position, 5)
+    if i == 0:
+        context = maze.get_full_context()
+    else:
+        context = maze.get_surroundings(bot.position, 5)
+        
     old_pos = bot.position
     bot.run_round(context)
     static_points = bot.get_static_heuristics()
@@ -106,7 +113,8 @@ for i in range(0, 300):
     """
 
     # ------- Dynamic plot -----
-    dynamic_plot = plotter.plot_heatmap(dynamic_points)#, max_val=max_val, min_val=min_val)
+    # Some dynamic points are None, meaning they should be considered as lowest temperature without skewing the scales
+    dynamic_plot = plotter.plot_heatmap(dynamic_points, extra_mapping={None: 0})#, max_val=max_val, min_val=min_val)
 
     # Plot empty blocks to ease the blur
     dynamic_plot = plotter.plot(

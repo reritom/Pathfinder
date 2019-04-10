@@ -1,6 +1,6 @@
 import math as maths
 from typing import List, Optional
-from .tools import surroundings_of
+from .tools import surroundings_of, get_artificial_blocks
 
 def get_neighbours(position: tuple, positions: List[tuple]):
     return [
@@ -23,7 +23,7 @@ def get_path(start: tuple, finish: tuple, positions: List[tuple]) -> List[tuple]
 
     reached_finish = False
 
-    while True:
+    while queue.positions:
         # Take the top priority item
         top_priority = queue.pop_top()
 
@@ -33,7 +33,30 @@ def get_path(start: tuple, finish: tuple, positions: List[tuple]) -> List[tuple]
             reached_finish = True
             break
 
-        for neighbour in get_neighbours(top_priority.position, positions):
+        # All the technically available neighbouring positions
+        neighbours = get_neighbours(top_priority.position, positions)
+
+        # As the bot can't move diagonally between two blocks, we determine the blocks, then determine any artificial blocks
+        neighbour_blocks = {
+            surrounding
+            for surrounding in surroundings_of(top_priority.position)
+            if surrounding not in neighbours
+        }
+
+        neighbour_blocks = neighbour_blocks.union(
+            get_artificial_blocks(
+                top_priority.position,
+                neighbour_blocks
+            )
+        )
+
+        neighbours = {
+            neighbour
+            for neighbour in neighbours
+            if neighbour not in neighbour_blocks
+        }
+
+        for neighbour in neighbours:
             queue.add(
                 Location(
                     position=neighbour,
@@ -44,10 +67,6 @@ def get_path(start: tuple, finish: tuple, positions: List[tuple]) -> List[tuple]
             )
 
         finished.add(top_priority)
-
-        if not queue.positions:
-            # We've gone as far as we can
-            break
 
     # Looking at the completed queue, we can find the route
     if reached_finish:
@@ -79,6 +98,7 @@ class PriorityQueue():
     def __init__(self):
         self.queue_items = []
         self.positions = []
+        self.processed = []
 
     def add(self, new_item):
         # If we already contain the item, check the new heuristic and replace it if it is better
@@ -98,6 +118,9 @@ class PriorityQueue():
             else:
                 return
 
+        if new_item.position in self.processed:
+            return
+
         # It doesn't already exist, so find the right place to insert it
         #print("{} Doesnt exist, adding it".format(new_item.position))
         for index, existing_item in enumerate(self.queue_items):
@@ -116,7 +139,7 @@ class PriorityQueue():
         return self.queue_items[0]
 
     def pop_top(self):
-        self.positions.pop(0)
+        self.processed.append(self.positions.pop(0))
         return self.queue_items.pop(0)
 
     def get_item_by_position(self, position):

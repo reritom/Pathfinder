@@ -57,7 +57,7 @@ def line_from_radial(point: tuple, theta, radius):
     dy = maths.sin(theta)*radius
     dx = maths.cos(theta)*radius
     line = Line(point,(dy, dx))
-    print("Line from {} {} {}".format(point, theta, radius, line))
+    #print("Line from {} {} {}".format(point, theta, radius, line))
     return line
 
 def get_intersection(line_a, line_b):
@@ -94,7 +94,7 @@ def get_intersection(line_a, line_b):
         x_intercept = (b_c - a_c) / (a_m - b_m)
         y_intercept = a_m*x_intercept + a_c
 
-    print("Intercept before range check {}".format((x_intercept, y_intercept)))
+    #print("Intercept before range check {}".format((x_intercept, y_intercept)))
 
     # Check if the intercepts are within the line_a segment
     max_x = max(line_a.a[0], line_a.b[0])
@@ -103,7 +103,7 @@ def get_intersection(line_a, line_b):
     min_y = min(line_a.a[1], line_a.b[1])
 
     if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
-        print("Intercept in line_a range")
+        #print("Intercept in line_a range")
         # Check if the intercepts are within the line_b segment
         max_x = max(line_b.a[0], line_b.b[0])
         min_x = min(line_b.a[0], line_b.b[0])
@@ -111,7 +111,7 @@ def get_intersection(line_a, line_b):
         min_y = min(line_b.a[1], line_b.b[1])
 
         if (x_intercept >= min_x) and (x_intercept <= max_x) and (y_intercept >= min_y) and (y_intercept <= max_y):
-            print("intercept ok")
+            #print("intercept ok")
             return (x_intercept, y_intercept)
 
     # Intercept doesn't lie on the segment
@@ -269,17 +269,25 @@ def lies_between(obstacle: tuple, point_a: tuple, point_b: tuple) -> bool:
             mag_a_o = get_magnitude(Line(centre_of(point_a), centre_of(obstacle)))
             mag_b_o = get_magnitude(Line(centre_of(point_b), centre_of(obstacle)))
             evaluation = abs(mag_a_b - (mag_a_o + mag_b_o))
-            print("Is parallel with eval of {}".format(evaluation))
+            #print("Is parallel with eval of {}".format(evaluation))
             if evaluation == 0:
                 return True
 
         elif intersect:
-            print("Intersect at i{} between lines o{} ab{}".format(intersect, obstacle_line, a_b_line))
+            #print("Intersect at i{} between lines o{} ab{}".format(intersect, obstacle_line, a_b_line))
             return True
 
         else:
-            print("No nuttin a{} o{} b{} line{}".format(point_a, obstacle, point_b, obstacle_line))
-            print(intersect)
+            #print("No nuttin a{} o{} b{} line{}".format(point_a, obstacle, point_b, obstacle_line))
+            #print(intersect)
+            pass
+
+def none_lie_between(obstacles: List[tuple], point_a: tuple, point_b: tuple) -> bool:
+    for obstacle in obstacles:
+        if lies_between(obstacle, point_a, point_b):
+            return False
+    else:
+        return True
 
 def get_artificial_blocks(point, surrounding_blocks):
     x, y = point
@@ -317,3 +325,51 @@ def get_artificial_blocks(point, surrounding_blocks):
             artificial_blocks.append(face_pair[2])
 
     return artificial_blocks
+
+def is_further_from(position, reference, target):
+    def minus(a, b):
+        try:
+            return a - b
+        except:
+            return 1
+
+    def divide(a, b):
+        try:
+            return a/b
+        except:
+            return a
+
+    dx_r_t = divide((reference[0] - target[0]), abs(minus(reference[0], target[0])))
+    dy_r_t = divide((reference[1] - target[1]), abs(minus(reference[1], target[1])))
+
+    dx_p_r = divide((position[0] - reference[0]), abs(minus(position[0], reference[0])))
+    dy_p_r = divide((position[1] - reference[1]), abs(minus(position[1], reference[1])))
+
+    return dx_r_t == -(dx_p_r) and dy_r_t == -(dy_p_r)
+
+def cache(key: str):
+    # Return the outer which decorates the def function and returns a new function
+    def outer(func):
+        def decorator(self, *args, **kwargs):
+            # This function replaces the actual call to the def function
+            if key in self.cache:
+                if args and args[0] in self.cache[key]:
+                    return self.cache[key][args[0]]
+            else:
+                self.cache[key] = {}
+
+            class Cacher:
+                def __init__(this):
+                    this.cache_it = False
+                def cache(this):
+                    this.cache_it = True
+
+            cacher = Cacher()
+            output = func(self, *args, **kwargs, cacher=cacher)
+
+            if cacher.cache_it:
+                self.cache[key][args[0]] = output
+
+            return output
+        return decorator
+    return outer

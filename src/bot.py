@@ -1,7 +1,7 @@
 from typing import List, Tuple
 import math as maths
 from .bot_tools import Location, PriorityQueue, distance_between, get_path
-from .tools import is_adjacent, surroundings_of
+from .tools import is_adjacent, surroundings_of, lies_between, none_lie_between, cache, is_further_from
 import random
 
 class Bot:
@@ -15,6 +15,7 @@ class Bot:
         self.priority_queue = PriorityQueue()
         self.processed = []
         self.blocks = set()
+        self.cache = {}
 
     def run_round(self, context) -> tuple:
         if self.position == self.target:
@@ -62,6 +63,9 @@ class Bot:
         lowest_key, lowest_value = None, None
 
         for key, value in dynamic_locations.items():
+            if value is None:
+                continue
+
             if lowest_key is None:
                 lowest_key, lowest_value = key, value
                 continue
@@ -69,6 +73,7 @@ class Bot:
             if value < lowest_value:
                 lowest_key, lowest_value = key, value
 
+        #print(f'Most valuable position is {lowest_key}, dynamics are {dynamic_locations}')
         return lowest_key
 
     def move_to(self, position):
@@ -102,15 +107,38 @@ class Bot:
             for location in self.locations.keys()
         }
 
-    def get_dynamic_heuristic(self, location: tuple):
+    @cache('dynamic')
+    def get_dynamic_heuristic(self, location: tuple, cacher=None):
         static = self.locations[location]['static']
         dynamic = static + distance_between(self.position, location)
         #print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
+        """
+        surroundings = [
+            surrounding
+            for surrounding
+            in surroundings_of(location)
+            if surrounding in self.previous_positions
+            and lies_between(surrounding, location, self.target)
+        ]
+
+        dynamic = dynamic*1.5**len(surroundings)
+        """
 
         # Repetition multiplier
-        #dynamic = dynamic*1.1**self.locations[location]['steps']
-
-        # Block surrounding multiplier
-
+        dynamic = dynamic*1.1**self.locations[location]['steps']
+        """
+        for previous in self.previous_positions:
+            if location != previous:
+                #print(f'{location}, {previous}')
+                if is_further_from(position=location, reference=previous, target=self.target):
+                    if none_lie_between(self.blocks, location, previous):
+                        # If we have the cache hook, we'll cache this value
+                        if cacher:
+                            cacher.cache()
+                        return None
+                    else:
+                        #print("Lol")
+                        pass
+        """
 
         return dynamic

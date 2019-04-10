@@ -99,7 +99,7 @@ class Plotter:
         else:
             return plot
 
-    def plot_heatmap(self, points: dict, inverse=False, blur=True, max_val=None, min_val=None):
+    def plot_heatmap(self, points: dict, inverse=False, blur=True, max_val=None, min_val=None, extra_mapping=None):
         if blur:
             plot = Image.new('RGBA', (self.x*self.spacing, self.y*self.spacing), (250, 250, 250, 1))
         else:
@@ -112,6 +112,9 @@ class Plotter:
             # Determine the range
             max_val, min_val = None, None
             for point, value in points.items():
+                # Skip any of the extra mappings
+                if extra_mapping and value in extra_mapping:
+                    continue
                 if min_val is None:
                     min_val = value
                 if max_val is None:
@@ -126,7 +129,14 @@ class Plotter:
 
         for point, value in points.items():
             px, py = point
-            r, g, b = get_pixel(mapper(value, min_val, max_val), map)
+            pixel_float = (
+                extra_mapping[value]
+                if extra_mapping
+                and value in extra_mapping
+                else mapper(value, min_val, max_val)
+            )
+
+            r, g, b = get_pixel(pixel_float, map)
             r, g, b = int(r), int(g), int(b)
 
             drawer.rectangle(

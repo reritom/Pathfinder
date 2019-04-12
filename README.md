@@ -4,17 +4,11 @@ The maze handles the environment, while the bot determines how to traverse the e
 The Pathfinder runs 'rounds' in a loop where the maze provides the environment information to the bot in the form of a context which contains the blocks and the available positions. The bot then uses a combination of static and dynamic heuristic calculations to find its way to the desired location.
 
 ### Positional plot demo
-<p align="center">
-  ![Position Demo](demo/demo_mp.gif)
-</p>
+[Position Demo](demo/demo_mp.gif)
 ### Static plot demo
-<p align="center">
-  ![Static Demo](demo/demo_sp.gif)
-</p>
+![Static Demo](demo/demo_sp.gif)
 ### Dynamic plot demo
-<p align="center">
-  ![Dynamic Demo](demo/demo_dp.gif)
-</p>
+![Dynamic Demo](demo/demo_dp.gif)
 
 ## Maze
 The primary goal of the maze is to mimic what the sensors of the bot would be able to determine, which are the obstacles and the available positions within a given range.

@@ -32,7 +32,7 @@ maze = Maze(50,50)
 
 print('There are {} blocks total'.format(len(maze.blocks)))
 """
-plotter = Plotter(maze.x, maze.y, 20)
+plotter = Plotter(maze.x, maze.y, 10)
 #plotter.set_null('black')
 
 map = {
@@ -58,11 +58,14 @@ for i in range(0, 400):
         break
 
     print("Round {}".format(i))
+    """
     if i == 0:
         context = maze.get_full_context()
     else:
         context = maze.get_surroundings(bot.position, 5)
-        
+    """
+    context = maze.get_surroundings(bot.position, 5)
+
     old_pos = bot.position
     bot.run_round(context)
     static_points = bot.get_static_heuristics()
@@ -89,28 +92,36 @@ for i in range(0, 400):
     map_plot = plotter.plot(points, map)
 
     # -------- Static plot -------
-    """
-    print("Plotting static heatmap")
     static_plot = plotter.plot_heatmap(static_points)#, max_val=max_val, min_val=min_val)
 
+    # Plot empty blocks to ease the blur
     static_plot = plotter.plot(
         {block: 1 for block in maze.blocks},
         {1: (250, 250, 250, 1)},
         static_plot
     )
 
+    # Plot each of the non-static points also to ease the blur
     static_plot = plotter.plot(
         {(x, y): 1 for x in range(maze.x) for y in range(maze.y) if (x, y) not in static_points},
         {1: (250, 250, 250, 1)},
         static_plot
     )
 
+    # Plot the bot and target
+    static_plot = plotter.plot(
+        {bot.position: 1, bot.target: 1},
+        {1: (220, 220, 220, 1)},
+        static_plot
+    )
+
+    # Plot the outlines of the blocks
     static_plot = plotter.plot_lines(
         static_plot,
         [(line.a, line.b) for line in maze.lines],
         (200, 200, 200, 1)
     )
-    """
+
 
     # ------- Dynamic plot -----
     # Some dynamic points are None, meaning they should be considered as lowest temperature without skewing the scales
@@ -130,6 +141,13 @@ for i in range(0, 400):
         dynamic_plot
     )
 
+    # Plot the bot and target
+    dynamic_plot = plotter.plot(
+        {bot.position: 1, bot.target: 1},
+        {1: (220, 220, 220, 1)},
+        dynamic_plot
+    )
+
     # Plot the outlines of the blocks
     dynamic_plot = plotter.plot_lines(
         dynamic_plot,
@@ -138,9 +156,9 @@ for i in range(0, 400):
     )
 
     images_mp.append(np.asarray(plotter.invert(map_plot)))
-    #images_sp.append(np.asarray(plotter.invert(static_plot)))
+    images_sp.append(np.asarray(plotter.invert(static_plot)))
     images_dp.append(np.asarray(plotter.invert(dynamic_plot)))
 
 imageio.mimsave('./test_mp.gif', images_mp, fps=10)
-#imageio.mimsave('./test_sp.gif', images_sp, fps=10)
+imageio.mimsave('./test_sp.gif', images_sp, fps=10)
 imageio.mimsave('./test_dp.gif', images_dp, fps=10)

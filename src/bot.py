@@ -1,6 +1,6 @@
 from typing import List, Tuple
 import math as maths
-from .bot_tools import Location, PriorityQueue, distance_between, get_path
+from .bot_tools import Location, PriorityQueue, distance_between, get_path, print_heuristics_lowest_first
 from .tools import is_adjacent, surroundings_of, lies_between, none_lie_between, cache, is_further_from
 import random
 
@@ -38,13 +38,16 @@ class Bot:
             return self.move_to(self.position)
 
         # We need to determine the waypoint depending on the available positions
-        dynamic_heuristics = self.get_dynamic_heuristics(only_untravelled=True)
-        location_to_aim_for = self.get_most_valuable_position(dynamic_heuristics)
-        self.ltaf = location_to_aim_for
+        if self.destination in self.locations:
+            self.ltaf = self.destination
+        else:
+            dynamic_heuristics = self.get_dynamic_heuristics(only_untravelled=True)
+            location_to_aim_for = self.get_most_valuable_position(dynamic_heuristics)
+            self.ltaf = location_to_aim_for
 
         # If the aim is in the immediate area, we will move there directly
-        if is_adjacent(location_to_aim_for, self.position):
-            return self.move_to(location_to_aim_for)
+        if is_adjacent(self.ltaf, self.position):
+            return self.move_to(self.ltaf)
 
         # Else we need to find the best route to the place we are aiming for and create a waypoint
         self.waypoint = get_path(
@@ -72,8 +75,10 @@ class Bot:
 
             if value < lowest_value:
                 lowest_key, lowest_value = key, value
+            elif value == lowest_value:
+                if is_further_from(lowest_key, key, self.target):
+                    lowest_key, lowest_value = key, value
 
-        #print(f'Most valuable position is {lowest_key}, dynamics are {dynamic_locations}')
         return lowest_key
 
     def move_to(self, position):
@@ -111,6 +116,9 @@ class Bot:
     def get_dynamic_heuristic(self, location: tuple, cacher=None):
         static = self.locations[location]['static']
         dynamic = static + distance_between(self.position, location)
+
+        #if location == self.target:
+        #    raise Exception(f'{self.position} {location} {static} {dynamic}')
         #print("Static {}, dynamic between {} {} {}".format(static, self.position, location, dynamic))
         """
         surroundings = [
@@ -133,12 +141,11 @@ class Bot:
                 if is_further_from(position=location, reference=previous, target=self.target):
                     if none_lie_between(self.blocks, location, previous):
                         # If we have the cache hook, we'll cache this value
-                        if cacher:
-                            cacher.cache()
-                        return None
+                        #if cacher:
+                        #    cacher.cache()
+                        dynamic = dynamic*2
                     else:
                         #print("Lol")
                         pass
         """
-
         return dynamic

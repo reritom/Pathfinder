@@ -2,6 +2,10 @@ import math as maths
 from typing import List, Optional
 from .tools import surroundings_of, get_artificial_blocks
 
+def print_heuristics_lowest_first(heuristics):
+    for key in sorted(heuristics, key=heuristics.get):
+        print(f"{key} {heuristics[key]}")
+
 def get_neighbours(position: tuple, positions: List[tuple]):
     return [
         surrounding

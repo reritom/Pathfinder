@@ -7,13 +7,13 @@ The Pathfinder runs 'rounds' in a loop where the maze provides the environment i
 Before explaining everything take a look below at the plots generated for a given run of the program. In each of the plots, the bot is following the same path, but we are plotting different things the bot considers in its pathfinding calculation.
 
 ### Positional plot demo
-In this plot, you see the bot, and the surroundings provided to the bot as available positions for its given location
+In this plot, you see the bot, and the surroundings provided to the bot as available positions for its given location.
 ![Position Demo](demo/demo_mp.gif)
 ### Static plot demo
-The static plot shows the static heuristics for all the positions known to the bot at the given time
+The static plot shows the static heuristics for all the positions known to the bot at the given time.
 ![Static Demo](demo/demo_sp.gif)
 ### Dynamic plot demo
-The dynamic plot shows the dynamic heuristics for all the positions known to the bot at the given time (there get recalculated each round)
+The dynamic plot shows the dynamic heuristics for all the positions known to the bot at the given time (there get recalculated each round).
 ![Dynamic Demo](demo/demo_dp.gif)
 
 ## Maze

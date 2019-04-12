@@ -78,3 +78,20 @@ static[x, y] = distance(to=destination, from=[x, y])
 dynamic[x, y] = static[x, y] + distance(to=[x, y], from=current_position)
 ```
 Then from this position, other conditions can be added to further optimise this heuristic.
+
+## Additional
+* Tests are run using:
+```
+python -m unittest discover
+```
+* The plotter is custom, built on top of the PIL module.
+### Bugs
+* If a full context is provided and the initial position has two adjacent blocked sides and a corner between them which is unblocked, the bot will be able to move to that corner when it shouldn't.
+```
+xx-
+xox
+xxx
+```
+(The bot at 'o' will move to '-' when that should be considered as an artificial block).
+These cases are handled correctly when getting the surroundings using `get_surroundings` and when the full context is provided but the next location to aim for isn't in the immediate surroundings, but not in this case.
+* The current dynamic heuristics aren't optimised.

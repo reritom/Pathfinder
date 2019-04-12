@@ -3,6 +3,10 @@ The Pathfinder consists of two main components: the maze and the bot.
 The maze handles the environment, while the bot determines how to traverse the environment to reach its objective.
 The Pathfinder runs 'rounds' in a loop where the maze provides the environment information to the bot in the form of a context which contains the blocks and the available positions. The bot then uses a combination of static and dynamic heuristic calculations to find its way to the desired location.
 
+![Position Demo](demo/test_mp.gif)
+![Static Demo](demo/test_sp.gif)
+![Dynamic Demo](demo/test_dp.gif)
+
 ## Maze
 The primary goal of the maze is to mimic what the sensors of the bot would be able to determine, which are the obstacles and the available positions within a given range.
 

@@ -107,10 +107,8 @@ class TestMergeLines(unittest.TestCase):
         self.assertTrue(lies_between((1, 2), (1, 1), (2, 3)))
         self.assertTrue(lies_between((3, 0), (1, 0), (4, 0)))
         self.assertTrue(lies_between((3, 0), (1, 1), (4, 0)))
-        print("RFHEY")
         self.assertTrue(lies_between((4, 0), (0, 1), (5, 0)))
-        print("END")
-    """
+
     def test_lies_between_false(self):
         self.assertFalse(lies_between((10, 10), (0, 0), (3, 3)))
         self.assertFalse(lies_between((1, 1), (0, 0), (2, 0)))
@@ -124,4 +122,3 @@ class TestMergeLines(unittest.TestCase):
 
         expected_artificial_block = (1, 1)
         self.assertIn(expected_artificial_block, artificial_blocks)
-    """

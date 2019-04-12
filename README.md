@@ -1,9 +1,9 @@
-#Pathfinder
+# Pathfinder
 The Pathfinder consists of two main components: the maze and the bot.
 The maze handles the environment, while the bot determines how to traverse the environment to reach its objective.
 The Pathfinder runs 'rounds' in a loop where the maze provides the environment information to the bot in the form of a context which contains the blocks and the available positions. The bot then uses a combination of static and dynamic heuristic calculations to find its way to the desired location.
 
-##Maze
+## Maze
 The primary goal of the maze is to mimic what the sensors of the bot would be able to determine, which are the obstacles and the available positions within a given range.
 
 The maze can either be made by creating an instance, and then adding or removing blocks from it using add_block and remove_block:
@@ -14,13 +14,13 @@ maze.add_block(10, 12) # X and Y coordinates
 maze.add_block(11, 20)
 ```
 Or the maze can be read from a text file of the format:
-
+```
 ----------
 ------xx--
 xxx----xxx
 ---xx---xx
 x---x-----
-
+```
 Using:
 ```
 maze = Maze.from_file('file/path.txt')
@@ -42,7 +42,7 @@ maze = Maze.from_json('path/to/json')
 ```
 
 
-##Bot
+## Bot
 The bot is a contextual object which gets provided information in the form a Context object each round
 Run round
 Get new surroundings and new blocks and add them to memory

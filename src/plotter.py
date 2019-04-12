@@ -30,8 +30,7 @@ heatmap = { # TODO convert this to an algorithm
 def get_pixel(value, map):
     valued = round(value / 0.05) * 0.05
     valued = round(valued, 2)
-    #print("{} rounded to {}".format(value, valued))
-    return heatmap[valued]
+    return map[valued]
 
 class Plotter:
     def __init__(self, x, y, spacing):
@@ -136,7 +135,7 @@ class Plotter:
                 else mapper(value, min_val, max_val)
             )
 
-            r, g, b = get_pixel(pixel_float, map)
+            r, g, b = get_pixel(pixel_float, heatmap)
             r, g, b = int(r), int(g), int(b)
 
             drawer.rectangle(

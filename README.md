@@ -9,24 +9,24 @@ Before explaining everything take a look below at the plots generated for a give
 ### Demo 1 - Bot with a view range of 5
 #### Positional plot demo
 ##### In this plot, you see the bot, and the surroundings provided to the bot as available positions for its given location.
-![Position Demo](demo/partial/demo_mp.gif)
+![Position Demo](demo/partial/test_mp.gif)
 #### Static plot demo
 ##### The static plot shows the static heuristics for all the positions known to the bot at the given time.
-![Static Demo](demo/partial/demo_sp.gif)
+![Static Demo](demo/partial/test_sp.gif)
 #### Dynamic plot demo
 ##### The dynamic plot shows the dynamic heuristics for all the positions known to the bot at the given time (they get recalculated each round).
-![Dynamic Demo](demo/partial/demo_dp.gif)
+![Dynamic Demo](demo/partial/test_dp.gif)
 
 ### Demo 2 - Bot with the entire environment known
 #### Positional plot demo
 ##### In this plot, you see the bot has already determined the complete waypoint to the destination
-![Position Demo](demo/full/demo_mp.gif)
+![Position Demo](demo/full/test_mp.gif)
 #### Static plot demo
 ##### The static plot shows the static heuristics for all the positions, and the heat of these don't vary
-![Static Demo](demo/full/demo_sp.gif)
+![Static Demo](demo/full/test_sp.gif)
 #### Dynamic plot demo
 ##### The dynamic plot shows the dynamic heuristics for all the positions (they get recalculated each round).
-![Dynamic Demo](demo/full/demo_dp.gif)
+![Dynamic Demo](demo/full/test_dp.gif)
 
 ## Maze
 The primary goal of the maze is to mimic what the sensors of the bot would be able to determine, which are the obstacles and the available positions within a given range.

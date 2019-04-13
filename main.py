@@ -41,7 +41,8 @@ map = {
     3: (150, 150, 150, 1),
     4: (200, 200, 200, 1),
     5: (50, 100, 150, 1),
-    6: (0, 0, 0, 1)
+    6: (0, 0, 0, 1),
+    7: (255, 243, 122, 1)
 }
 
 images_mp = []
@@ -58,6 +59,7 @@ for i in range(0, 400):
         break
 
     print("Round {}".format(i))
+
     """
     if i == 0:
         context = maze.get_full_context()
@@ -65,8 +67,6 @@ for i in range(0, 400):
         context = maze.get_surroundings(bot.position, 5)
     """
     context = maze.get_surroundings(bot.position, 5)
-
-    old_pos = bot.position
     bot.run_round(context)
     static_points = bot.get_static_heuristics()
     dynamic_points = bot.get_dynamic_heuristics()
@@ -84,10 +84,13 @@ for i in range(0, 400):
     for surrounding in context.surroundings:
         points[surrounding] = 4
 
-    points[old_pos] = 6
     points[bot.ltaf] = 1
     points[bot.position] = 2
     points[(40, 40)] = 5
+
+    if bot.waypoint:
+        for location in bot.waypoint:
+            points[location] = 7
 
     map_plot = plotter.plot(points, map)
 
